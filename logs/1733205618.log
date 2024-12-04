@@ -1,0 +1,5 @@
+2024-12-03 14:00:18,892 INFO  Set parameter al_epochs to 75
+2024-12-03 14:00:18,898 INFO  Number of entities: 14541
+2024-12-03 14:00:18,898 INFO  Number of relations: 711
+2024-12-03 14:00:18,898 INFO  Initializing training sample streamer
+2024-12-03 14:00:18,968 INFO  Clustering: started

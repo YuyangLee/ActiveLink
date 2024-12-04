@@ -1,0 +1,4 @@
+data/FB15k-237
+data/wikidata_300k
+data/wikidata_1000k
+*pycache*

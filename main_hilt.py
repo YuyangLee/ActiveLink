@@ -123,13 +123,7 @@ def main():
 
         log.info("Train model: started")
 
-        if config.training_mode == "retrain":
-            model = init_model(config, len(entity2id), len(rel2id))
-            run_incremental(model, config, train_batcher, test_rank_batcher)
-        elif config.training_mode == "incremental":
-            model = run_incremental(model, config, train_batcher, test_rank_batcher)
-        else:
-            model = run_meta_incremental(config, model, train_batcher, test_rank_batcher)
+        model = run_meta_incremental(config, model, train_batcher, test_rank_batcher)
         log.info("Train model: finished")
 
         log.info("Update training set: started")

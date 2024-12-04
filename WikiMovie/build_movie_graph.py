@@ -43,7 +43,7 @@ def map_deserialize_data(line):
 
 
 def map_build_graph_entry(record):
-    for prop_id, props in record.get("claims", {}).iteritems():
+    for prop_id, props in record.get("claims", {}).items():
         for prop in props:
             if is_reliable_property(prop) and is_wikibase_item(prop):
                 yield "{head}\t{relation}\t{tail}".format(

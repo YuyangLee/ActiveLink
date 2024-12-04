@@ -24,13 +24,28 @@ class DataStreamer(object):
         self.data = []  # all triples
         self.batch_idx = 0
         self.device_id = torch.cuda.current_device()
-        self.entity2id = entity2id  # entity to id mapping
-        self.rel2id = rel2id  # relation to id mapping
+        self._entity2id = entity2id  # entity to id mapping
+        self._rel2id = rel2id  # relation to id mapping
         self.use_all_data = use_all_data  # if True – iterator will return all data (last batch size <= self.batch_size)
 
         self.str2var = {}
-        self.num_entities = len(entity2id)
+        
+    @property
+    def num_entities(self):
+        return len(self.entity2id)
 
+    @property
+    def num_relations(self):
+        return len(self.rel2id)
+    
+    @property
+    def entity2id(self):
+        return self._entity2id
+    
+    @property
+    def rel2id(self):
+        return self._rel2id
+    
     def init_from_path(self, path):
         triples = []
 
@@ -44,10 +59,10 @@ class DataStreamer(object):
         self.data = triples
         self.get_multi_keys_length(triples)
 
-    def init_from_list(self, triples):
-        self.dataset_size = len(triples)
-        self.data = triples
-        self.get_multi_keys_length(triples)
+    def init_from_list(self, triplets):
+        self.dataset_size = len(triplets)
+        self.data = triplets
+        self.get_multi_keys_length(triplets)
 
     def get_multi_keys_length(self, triples):
         for triple in triples:
@@ -64,7 +79,7 @@ class DataStreamer(object):
 
         # list of dicts -> dict of lists
         for triple in triples:
-            for key, value in triple.iteritems():
+            for key, value in triple.items():
                 if not isinstance(value, list):
                     new_value = [value]
                 else:
@@ -72,19 +87,19 @@ class DataStreamer(object):
                 ent_rel_dict[key].append(new_value)
 
         # list -> numpy.array
-        for key, value in ent_rel_dict.iteritems():
+        for key, value in ent_rel_dict.items():
             ent_rel_dict[key] = np.array(value, dtype=np.int64)
 
         return ent_rel_dict
 
-    def tokens_to_ids(self, triple):
+    def tokens_to_ids(self, triplet):
         entity_keys = {"e1", "e2"}
         multi_entity_keys = {"e2_multi1", "e2_multi2"}
         relation_keys = {"rel", "rel_eval"}
 
         res = {}
 
-        for key, value in triple.iteritems():
+        for key, value in triplet.items():
             if value == "None":
                 continue
             if key in entity_keys:
@@ -110,11 +125,11 @@ class DataStreamer(object):
                 batch[key + "_binary"] = new_value
 
     def torch_convertor(self, batch):
-        for key, value in batch.iteritems():
+        for key, value in batch.items():
             batch[key] = Variable(torch.from_numpy(value), volatile=False)
 
     def torch_cuda_convertor(self, batch):
-        for key, value in batch.iteritems():
+        for key, value in batch.items():
             batch[key] = value.cuda(self.device_id, True)
 
     def __iter__(self):
@@ -198,7 +213,7 @@ class DataSampleStreamer(DataStreamer):
 
         stop_sampling = False
 
-        for cluster_id, cluster_data in self.clusters.iteritems():
+        for cluster_id, cluster_data in self.clusters.items():
             if stop_sampling:
                 end_index = 0
             else:
@@ -277,13 +292,53 @@ class DataSampleStreamer(DataStreamer):
             current_sample.append(self.remaining_data.pop(idx))
 
         return current_sample
+    
+    def update_random_by_query(self):
+        # TODO: Baseline
+        pass
+
+    def update_relation_uncert_by_query(self, model):
+        current_sample = []
+
+        model.train()  # activate dropouts
+
+        if len(self.remaining_data) % self.batch_size == 1:
+            batch_size = self.batch_size - 1  # we need this trick because batch_norm doesn't accept tensor of size 1
+        else:
+            batch_size = self.batch_size
+
+        uncertainty = torch.cuda.FloatTensor(len(self.remaining_data))
+
+        remaining_data_streamer = DataStreamer(self.entity2id, self.rel2id, batch_size, use_all_data=True)
+        remaining_data_streamer.init_from_list(self.remaining_data)
+
+        for i, str2var in enumerate(remaining_data_streamer):
+            current_batch_size = len(str2var["e1"])
+
+            pred = torch.cuda.FloatTensor(10, current_batch_size, self.num_relations)
+
+            for j in range(10):
+                pred_ = model.forward(str2var["e1"], str2var["rel"], batch_size=current_batch_size)
+                pred[j] = F.sigmoid(pred_).data
+
+            current_batch_uncertainty = self.count_uncertainty(pred)  # 1 x cluster_size
+            uncertainty[(i * batch_size): (i * batch_size + current_batch_size)] = current_batch_uncertainty
+
+        uncertainty_sorted, uncertainty_indices_sorted = torch.sort(uncertainty, 0, descending=True)
+
+        top_n = uncertainty_indices_sorted[:self.sample_size]
+
+        for idx in sorted(top_n, reverse=True):  # delete elements from right to left to avoid issues with reindexing
+            current_sample.append(self.remaining_data.pop(idx))
+
+        return current_sample
 
     def update_clustering(self):
         empty_clusters = []
         current_sample = []
         all_clusters_size = sum(len(v) for v in self.clusters.values())
 
-        for cluster_id, cluster_data in self.clusters.iteritems():
+        for cluster_id, cluster_data in self.clusters.items():
             random.shuffle(cluster_data)
 
             current_cluster_ratio = float(len(cluster_data)) / all_clusters_size
@@ -310,7 +365,7 @@ class DataSampleStreamer(DataStreamer):
         all_clusters_size = sum(len(v) for v in self.clusters.values())
 
         model.train()  # activate dropouts
-        for cluster_id, cluster_data in self.clusters.iteritems():
+        for cluster_id, cluster_data in self.clusters.items():
             if len(cluster_data) % self.batch_size == 1:
                 batch_size = self.batch_size - 1  # we need this trick because batch_norm doesn't accept tensor of size 1
             else:
@@ -365,8 +420,8 @@ class DataSampleStreamer(DataStreamer):
 
         with open(path) as training_set_file:
             for line in training_set_file:
-                triple = json.loads(line.strip())
-                triple_w_ids = self.tokens_to_ids(triple)
+                triplet = json.loads(line.strip())
+                triple_w_ids = self.tokens_to_ids(triplet)
                 cluster_id = entity2cluster[triple_w_ids["e1"]]
                 self.clusters[cluster_id].append(triple_w_ids)
         log.info("Clustering: finished")
@@ -377,9 +432,22 @@ class DataSampleStreamer(DataStreamer):
 
         labels = {}
 
-        entity_embeddings = np.loadtxt(self.entity_embed_path)
+        # entity_embeddings = np.loadtxt(self.entity_embed_path)
+        weights = torch.load(self.entity_embed_path, weights_only=True)
+        entity_embeddings = weights['ent_embeddings.weight'].cpu().numpy()
+        relation_embeddings = weights['rel_embeddings.weight'].cpu().numpy()
         kmeans = KMeans(n_clusters=self.n_clusters).fit(entity_embeddings)
         labels_lst = kmeans.labels_.tolist()
+        
+        # DEBUG - tsne
+        from sklearn.manifold import TSNE
+        import matplotlib.pyplot as plt
+        tsne = TSNE(n_components=2, random_state=0)
+        entity_embeddings_2d = tsne.fit_transform(entity_embeddings)
+        label_colors = [plt.cm.Spectral(each) for each in np.linspace(0, 1, self.n_clusters)]
+        plt.scatter(entity_embeddings_2d[:, 0], entity_embeddings_2d[:, 1], c=label_colors)
+        plt.show()
+        
 
         for entity_id, cluster_id in enumerate(labels_lst):
             labels[entity_id] = cluster_id

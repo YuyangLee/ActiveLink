@@ -41,7 +41,7 @@ class Config(object):
     optimizer = 'adam'
 
     def __init__(self, args):
-        for name, value in vars(args).iteritems():
+        for name, value in vars(args).items():
             if value is not None:
                 setattr(self, name, value)
                 log.info('Set parameter %s to %s', name, value)
@@ -59,6 +59,6 @@ class Config(object):
         self.train_path = os.path.join("data", self.dataset, "e1rel_to_e2_train.json")
         self.ranking_dev_path = os.path.join("data", self.dataset, "e1rel_to_e2_ranking_dev.json")
         self.ranking_test_path = os.path.join("data", self.dataset, "e1rel_to_e2_ranking_test.json")
-        self.entity_embed_path = os.path.join("data", self.dataset, "entity2vec")
+        self.entity_embed_path = os.path.join("data", self.dataset, "transe.ckpt")
         self.entity2id_path = os.path.join("data", self.dataset, "entity2id.txt")
         self.relation2id_path = os.path.join("data", self.dataset, "relation2id.txt")
