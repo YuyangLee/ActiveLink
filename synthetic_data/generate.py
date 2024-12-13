@@ -1,13 +1,13 @@
 import numpy as np
-
+from numba import jit
 import argparse
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--entity', type=int, default=50)
-parser.add_argument('--relation', type=int, default=10)
+parser.add_argument('--entity', type=int, default=200)
+parser.add_argument('--relation', type=int, default=20)
 parser.add_argument('--lambda1', type=float, default=2.0)
-parser.add_argument('--lambda2', type=float, default=0.5)
-parser.add_argument('--known', type=int, default=10)
+parser.add_argument('--lambda2', type=float, default=1)
+parser.add_argument('--known', type=int, default=200)
 parser.add_argument('--seed', type=int, default=2025)
 parser.add_argument('--output', type=str, default='relations.txt')
 
@@ -33,35 +33,49 @@ def generate_data(i):
 All_Rules = []
 for i in range(args.relation):
     All_Rules += generate_data(i)
+
 print(f"Generated {len(All_Rules)} rules")
+with open('rules.txt', 'w') as file:
+    for i, Rule in All_Rules:
+        file.write(f"{i}\n")
+        for row in Rule:
+            file.write(" ".join(map(str, row)) + "\n")
 
 known_relations = set()
 for _ in range(args.known):
     known_relations.add((np.random.randint(args.relation), np.random.randint(args.entity), np.random.randint(args.entity)))
+# Delete unused entities and rename the entities to be continuous
+known_entities = set()
+for relation in known_relations:
+    known_entities.add(relation[1])
+    known_entities.add(relation[2])
+known_entities = list(known_entities)
+entity_mapping = {entity: i for i, entity in enumerate(known_entities)}
+known_relations = {(relation[0], entity_mapping[relation[1]], entity_mapping[relation[2]]) for relation in known_relations}
+print(f"Generated {len(known_entities)} entities")
+number = len(known_entities)
 
 # Helper function to check if a given mapping satisfies all relations in the rule
-def check_mapping(rule, mapping):
+@jit(nopython=True)
+def check_mapping(rule, mapping, knowns):
     for relation, entity1, entity2 in rule:
-        real_entity1 = mapping.get(entity1, None)
-        real_entity2 = mapping.get(entity2, None)
-        if (relation, real_entity1, real_entity2) not in known_relations:
+        real_entity1 = mapping[entity1]
+        real_entity2 = mapping[entity2]
+        if (relation, real_entity1, real_entity2) not in knowns:
             return False
     return True
 
 # Helper function for backtracking to try all possible mappings
-def try_mapping(rule, mapping, pseudo_entities, idx=0):
-    if idx == len(pseudo_entities):
+@jit(nopython=True)
+def try_mapping(rule, knowns, mapping, number_pseudo_entities, idx=0):
+    if idx == number_pseudo_entities:
         # If we've tried all pseudo entities and found a valid mapping, check the rule
-        return check_mapping(rule, mapping)
-    
-    # Try assigning each possible real entity to the current pseudo entity
-    pseudo_entity = pseudo_entities[idx]
-    for entity in range(args.entity):
-        # if entity not in mapping.values():  # Ensure we do not reuse an entity
-        mapping[pseudo_entity] = entity
-        if try_mapping(rule, mapping, pseudo_entities, idx + 1):
+        return check_mapping(rule, mapping, knowns)
+
+    for entity in range(number):
+        mapping[idx] = entity
+        if try_mapping(rule, knowns, mapping, number_pseudo_entities, idx + 1):
             return True
-        del mapping[pseudo_entity]  # Backtrack
     return False
 
 # deduce all known relations
@@ -72,15 +86,15 @@ while True:
     new_relations = set()
     for rule_index, Rule in All_Rules:
         # Extract pseudo entities from the rule
-        pseudo_entities = list(set(Rule[:, 1:3].flatten()))  # Pseudo entities are the entity columns in the rule
+        number_pseudo_entities = len(set(Rule[:, 1:3].flatten()))
 
         # Try mapping pseudo entities to real entities
-        mapping = {}
-        if try_mapping(Rule, mapping, pseudo_entities):
+        mapping = np.zeros(number_pseudo_entities, dtype=np.int64) # Initialize the mapping
+        if try_mapping(Rule, list(known_relations), mapping, number_pseudo_entities):
             # If a valid mapping is found, deduce the real relations
             # Create the new relation using the mapping of pseudo entities to real ones
-            real_entity1 = mapping.get(0, None)
-            real_entity2 = mapping.get(1, None)
+            real_entity1 = mapping[0]
+            real_entity2 = mapping[1]
             if real_entity1 is not None and real_entity2 is not None:
                 if (rule_index, real_entity1, real_entity2) not in known_relations:
                     new_relations.add((rule_index, real_entity1, real_entity2))  # Add the new relation
