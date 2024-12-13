@@ -3,12 +3,12 @@ from numba import jit
 import argparse
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--entity', type=int, default=200)
-parser.add_argument('--relation', type=int, default=20)
+parser.add_argument('--entity', type=int, default=100)
+parser.add_argument('--relation', type=int, default=40)
 parser.add_argument('--lambda1', type=float, default=2.0)
-parser.add_argument('--lambda2', type=float, default=1)
-parser.add_argument('--known', type=int, default=200)
-parser.add_argument('--seed', type=int, default=2025)
+parser.add_argument('--lambda2', type=float, default=0.8)
+parser.add_argument('--known', type=int, default=100)
+parser.add_argument('--seed', type=int, default=2024)
 parser.add_argument('--output', type=str, default='relations.txt')
 
 args = parser.parse_args()
@@ -17,7 +17,7 @@ np.random.seed(args.seed)
 
 def generate_rule():
     total_triplets = np.random.poisson(args.lambda2) + 1
-    total_addition_entity = np.random.randint(0, min(total_triplets, 2 * total_triplets - 2) + 1)
+    total_addition_entity = min(np.random.randint(0, min(total_triplets, 2 * total_triplets - 2) + 1), 3)
     total_relation = np.random.randint(1, min(total_triplets, args.relation) + 1)
     relations = np.random.choice(args.relation, total_relation, replace=False)
     Relation = np.random.choice(relations, total_triplets, replace=True)
@@ -42,7 +42,10 @@ with open('rules.txt', 'w') as file:
             file.write(" ".join(map(str, row)) + "\n")
 
 known_relations = set()
-for _ in range(args.known):
+for i in range(args.relation):
+    known_relations.add((i, np.random.randint(args.entity), np.random.randint(args.entity)))
+
+for _ in range(args.known - args.relation):
     known_relations.add((np.random.randint(args.relation), np.random.randint(args.entity), np.random.randint(args.entity)))
 # Delete unused entities and rename the entities to be continuous
 known_entities = set()
