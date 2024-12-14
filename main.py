@@ -26,11 +26,11 @@ def parse_args():
     parser.add_argument("--inner-lr", dest="inner_learning_rate", type=int)
     parser.add_argument("--lr", dest="learning_rate", type=float)
     parser.add_argument("--lr-decay", dest="learning_rate_decay", type=float)
-    parser.add_argument("--model", dest="model_name", choices=["ConvE", "MLP"])
+    parser.add_argument("--model", dest="model_name", default="ConvE", choices=["ConvE", "MLP"])
     parser.add_argument("--n-clusters", dest="n_clusters", type=int)
     parser.add_argument("--sample-size", dest="sample_size", type=int, help="number of training examples per one AL iteration")
-    parser.add_argument("--sampling-mode", dest="sampling_mode", choices=["random", "uncertainty", "structured", "structured-uncertainty"])
-    parser.add_argument("--training-mode", dest="training_mode", choices=["retrain", "incremental", "meta-incremental"])
+    parser.add_argument("--sampling-mode", dest="sampling_mode", default="random", choices=["random", "uncertainty", "structured", "structured-uncertainty"])
+    parser.add_argument("--training-mode", dest="training_mode", default="meta-incremental", choices=["retrain", "incremental", "meta-incremental"])
     parser.add_argument("--window-size", dest="window_size", type=int)
 
     return parser.parse_args()
@@ -75,7 +75,11 @@ def build_vocabs(config):
             relation2id[relation] = int(rel_idx)  # id == 0 is a bad idea
             relation2id[relation + "_reverse"] = rel_reverse_idx
             rel_reverse_idx += 1
-
+            
+    # Initial ID: 1 -> 0
+    entity2id = {k: v - 1 for k, v in entity2id.items()}
+    relation2id = {k: v - 1 for k, v in relation2id.items()}
+            
     return entity2id, relation2id
 
 
@@ -116,7 +120,8 @@ def main():
     test_rank_batcher = DataStreamer(entity2id, rel2id, config.batch_size)
     test_rank_batcher.init_from_path(config.ranking_test_path)
 
-    model = init_model(config, len(entity2id), len(rel2id))
+    model = init_model(config, max(entity2id.values()) + 1, max(rel2id.values()) + 1)
+    # model = init_model(config, len(entity2id), len(rel2id))
 
     for epoch in range(config.al_epochs):
         log.info("{} iteration of active learning: started".format(epoch + 1))

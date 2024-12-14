@@ -154,7 +154,7 @@ def run_meta_incremental(config, model, train_batcher, test_rank_batcher):
 
         log.info("Inner loop: started")
         inner_loop_start = datetime.datetime.now()
-        for task in train_batcher:
+        for task in train_batcher.tasks:
             g = run_inner(config, model, task)
             grads.append(g)
         log.info("Inner loop: finished")
