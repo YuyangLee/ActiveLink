@@ -10,8 +10,9 @@ from logger import setup_logger
 from meta_incr_training import run_meta_incremental
 from models import ConvE, MultilayerPerceptropn
 
+import wandb
 
-setup_logger()
+log_dir, time_tag = setup_logger()
 log = logging.getLogger()
 
 def parse_args():
@@ -26,11 +27,11 @@ def parse_args():
     parser.add_argument("--inner-lr", dest="inner_learning_rate", type=int)
     parser.add_argument("--lr", dest="learning_rate", type=float)
     parser.add_argument("--lr-decay", dest="learning_rate_decay", type=float)
-    parser.add_argument("--model", dest="model_name", default="ConvE", choices=["ConvE", "MLP"])
+    parser.add_argument("--model", dest="model_name", choices=["ConvE", "MLP"])
     parser.add_argument("--n-clusters", dest="n_clusters", type=int)
     parser.add_argument("--sample-size", dest="sample_size", type=int, help="number of training examples per one AL iteration")
-    parser.add_argument("--sampling-mode", dest="sampling_mode", default="random", choices=["random", "uncertainty", "structured", "structured-uncertainty"])
-    parser.add_argument("--training-mode", dest="training_mode", default="meta-incremental", choices=["retrain", "incremental", "meta-incremental"])
+    parser.add_argument("--sampling-mode", dest="sampling_mode", choices=["omni_random", "omni_t_uncer", "random", "r_uncer"])
+    parser.add_argument("--training-mode", dest="training_mode", choices=["retrain", "incremental", "meta-incremental"])
     parser.add_argument("--window-size", dest="window_size", type=int)
 
     return parser.parse_args()
@@ -85,8 +86,14 @@ def build_vocabs(config):
 
 def main():
     args = parse_args()
+    run_nametag = f"ds={args.dataset}_mode={args.sampling_mode}_model={args.model_name}-{time_tag}"
 
     config = Config(args)
+    logger = wandb.init(project="active-learning-kgc", dir=log_dir, name=run_nametag, config=vars(config))
+    
+    # Percentage
+    # wandb.define_metric("train/completeness")
+    # wandb.define_metric("eval/*", step_metric="train/completeness")
 
     entity2id, rel2id = build_vocabs(config)
     log.info("Number of entities: {}".format(len(entity2id)))
@@ -134,7 +141,7 @@ def main():
         elif config.training_mode == "incremental":
             model = run_incremental(model, config, train_batcher, test_rank_batcher)
         else:
-            model = run_meta_incremental(config, model, train_batcher, test_rank_batcher)
+            model = run_meta_incremental(config, model, train_batcher, test_rank_batcher, logger)
         log.info("Train model: finished")
 
         log.info("Update training set: started")

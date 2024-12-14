@@ -188,19 +188,19 @@ class DataSampleStreamer(DataStreamer):
             # TODO: Mark test triplets
 
     def init(self, path):
-        if self.sampling_mode == "random":
+        if self.sampling_mode == "omni_random":
             initial_sample = self.init_random(path)
-        elif self.sampling_mode == "uncertainty":
+        elif self.sampling_mode == "omni_t_uncer":
             initial_sample = self.init_random(path)
-        elif self.sampling_mode == "structured":
-            initial_sample = self.init_w_clustering(path)
-        elif self.sampling_mode == "structured-uncertainty":
-            initial_sample = self.init_w_clustering(path)
+        elif self.sampling_mode == "random":
+            initial_sample = self.init_random(path)
+        elif self.sampling_mode == "r_uncer":
+            initial_sample = self.init_random(path)
             
-        elif self.sampling_mode == "random_by_query":
-            initial_sample = self.init_random()
-        elif self.sampling_mode == "relation_uncert_by_query":
-            initial_sample = self.init_random()
+        # elif self.sampling_mode == "structured":
+        #     initial_sample = self.init_w_clustering(path)
+        # elif self.sampling_mode == "structured-uncertainty":
+        #     initial_sample = self.init_w_clustering(path)
             
         else:
             raise Exception("Unknown sampling method")
@@ -223,10 +223,6 @@ class DataSampleStreamer(DataStreamer):
         sample, self.remaining_data = triples[:self.sample_size], triples[self.sample_size:]
 
         return sample
-
-    @property
-    def dataset_size(self):
-        return sum([ task.dataset_size for task in self.tasks ])
 
     def update_triplet_map_from_data(self):
         for triple in self.data:
@@ -271,22 +267,27 @@ class DataSampleStreamer(DataStreamer):
 
         return initial_sample
 
+    @property
+    def curr_completeness(self):
+        return self.dataset_size / (self.dataset_size + len(self.remaining_data))
+
+    @property
+    def curr_n_triplets(self):
+        return self.dataset_size
+
     def update(self, model):
-        if self.sampling_mode == "random":
-            current_sample = self.update_random()
-        elif self.sampling_mode == "uncertainty":
-            current_sample = self.update_uncert(model)
-        elif self.sampling_mode == "structured":
-            current_sample = self.update_clustering()
-        elif self.sampling_mode == "structured-uncertainty":
-            current_sample = self.update_uncert_w_clustering(model)
-            
-        # Update by query
+        if self.sampling_mode == "omni_random":
+            current_sample = self.update_omni_random()
+        elif self.sampling_mode == "omni_t_uncer":
+            current_sample = self.update_omni_t_uncert(model)
         elif self.sampling_mode == "random_by_query":
-            initial_sample = self.update_random_by_query()
+            current_sample = self.update_random()
         elif self.sampling_mode == "relation_uncert_by_query":
-            initial_sample = self.update_relation_uncert_by_query()
-            
+            current_sample = self.update_r_uncer()
+        # elif self.sampling_mode == "structured":
+        #     current_sample = self.update_clustering()
+        # elif self.sampling_mode == "structured-uncertainty":
+        #     current_sample = self.update_uncert_w_clustering(model)
             
         else:
             raise Exception("Unknown sampling method")
@@ -296,11 +297,11 @@ class DataSampleStreamer(DataStreamer):
 
         log.info("Training sample size: {}".format(self.dataset_size))
 
-    def update_random(self):
+    def update_omni_random(self):
         current_sample, self.remaining_data = self.remaining_data[:self.sample_size], self.remaining_data[self.sample_size:]
         return current_sample
 
-    def update_uncert(self, model):
+    def update_omni_t_uncert(self, model):
         current_sample = []
 
         model.train()  # activate dropouts
@@ -349,7 +350,7 @@ class DataSampleStreamer(DataStreamer):
             for e1, rel, e2 in zip (heads, rels, tails) if self.triplets[heads, rels, tails] == StripletStatus.KNOWN_TRUE
         ]
     
-    def update_random_by_query(self):
+    def update_random(self):
         current_sample = []
         
         N_SAMPLES = 10000
@@ -363,7 +364,7 @@ class DataSampleStreamer(DataStreamer):
         
         # current_sample = 
 
-    def update_relation_uncert_by_query(self, model):
+    def update_r_uncer(self, model):
         current_sample = []
 
         model.train()  # activate dropouts
@@ -551,16 +552,24 @@ class DataTaskStreamer(DataSampleStreamer):
         self.clusters = defaultdict(list)  # {cluster_id: [{"e1": ent1_id, "rel": rel_id, "e2_multi1": [ent2_id, ent3_id]}]}
         self.task_idx = -1
         self.tasks = []
+        
+    @property
+    def dataset_size(self):
+        return sum([ task.dataset_size for task in self.tasks ])
 
     def init(self, path):
-        if self.sampling_mode == "random":
+        if self.sampling_mode == "omni_random":
             initial_sample = self.init_random(path)
-        elif self.sampling_mode == "uncertainty":
+        elif self.sampling_mode == "omni_t_uncer":
             initial_sample = self.init_random(path)
-        elif self.sampling_mode == "structured":
-            initial_sample = self.init_w_clustering(path)
-        elif self.sampling_mode == "structured-uncertainty":
-            initial_sample = self.init_w_clustering(path)
+        elif self.sampling_mode == "random":
+            initial_sample = self.init_random(path)
+        elif self.sampling_mode == "r_uncer":
+            initial_sample = self.init_random(path)
+        # elif self.sampling_mode == "structured":
+        #     initial_sample = self.init_w_clustering(path)
+        # elif self.sampling_mode == "structured-uncertainty":
+        #     initial_sample = self.init_w_clustering(path)
         else:
             raise Exception("Unknown sampling method")
 
@@ -573,14 +582,18 @@ class DataTaskStreamer(DataSampleStreamer):
         log.info("Training sample size: {}".format(self.dataset_size))
 
     def update(self, model):
-        if self.sampling_mode == "random":
+        if self.sampling_mode == "omni_random":
+            current_sample = self.update_omni_random()
+        elif self.sampling_mode == "omni_t_uncer":
+            current_sample = self.update_omni_t_uncert(model)
+        elif self.sampling_mode == "random_by_query":
             current_sample = self.update_random()
-        elif self.sampling_mode == "uncertainty":
-            current_sample = self.update_uncert(model)
-        elif self.sampling_mode == "structured":
-            current_sample = self.update_clustering()
-        elif self.sampling_mode == "structured-uncertainty":
-            current_sample = self.update_uncert_w_clustering(model)
+        elif self.sampling_mode == "relation_uncert_by_query":
+            current_sample = self.update_r_uncer()
+        # elif self.sampling_mode == "structured":
+        #     current_sample = self.update_clustering()
+        # elif self.sampling_mode == "structured-uncertainty":
+        #     current_sample = self.update_uncert_w_clustering(model)
         else:
             raise Exception("Unknown sampling method")
 
