@@ -31,8 +31,8 @@ def ranking_and_hits(model, dev_rank_batcher, batch_size, name, silent=False):
         e2 = str2var['e2']
         rel = str2var['rel']
         rel_reverse = str2var['rel_eval']
-        e2_multi1 = str2var['e2_multi1'].float()
-        e2_multi2 = str2var['e2_multi2'].float()
+        e2_multi1 = str2var['e2_multi1']#.float()
+        e2_multi2 = str2var['e2_multi2']#.float()
         pred1_ = model.forward(e1, rel)
         pred2_ = model.forward(e2, rel_reverse)
 
@@ -49,8 +49,8 @@ def ranking_and_hits(model, dev_rank_batcher, batch_size, name, silent=False):
             filter2 = e2_multi2[i][e2_multi2[i] != -1].long()
 
             # save the prediction that is relevant
-            target_value1 = pred1[i, e2[i, 0]]
-            target_value2 = pred2[i, e1[i, 0]]
+            target_value1 = pred1[i, e2[i, 0]].clone()
+            target_value2 = pred2[i, e1[i, 0]].clone()
 
             # zero all known cases (this are not interesting)
             # this corresponds to the filtered setting
@@ -65,10 +65,13 @@ def ranking_and_hits(model, dev_rank_batcher, batch_size, name, silent=False):
         max_values, argsort2 = torch.sort(pred2, 1, descending=True)
         argsort1 = argsort1.cpu().numpy()
         argsort2 = argsort2.cpu().numpy()
+        
+        e2_np = e2.cpu().numpy()
+        e1_np = e1.cpu().numpy()
         for i in range(batch_size):
             # find the rank of the target entities
-            rank1 = np.where(argsort1[i]==e2[i, 0])[0][0]
-            rank2 = np.where(argsort2[i]==e1[i, 0])[0][0]
+            rank1 = np.where(argsort1[i]==e2_np[i, 0])[0][0]
+            rank2 = np.where(argsort2[i]==e1_np[i, 0])[0][0]
             # rank+1, since the lowest rank is rank 1 not rank 0
             ranks.append(rank1+1)
             ranks_left.append(rank1+1)

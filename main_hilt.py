@@ -26,10 +26,10 @@ def parse_args():
     parser.add_argument("--inner-lr", dest="inner_learning_rate", type=int)
     parser.add_argument("--lr", dest="learning_rate", type=float)
     parser.add_argument("--lr-decay", dest="learning_rate_decay", type=float)
-    parser.add_argument("--model", dest="model_name", choices=["ConvE", "MLP"])
+    parser.add_argument("--model", default="ConvE", dest="model_name", choices=["ConvE", "MLP"])
     parser.add_argument("--n-clusters", dest="n_clusters", type=int)
     parser.add_argument("--sample-size", dest="sample_size", type=int, help="number of training examples per one AL iteration")
-    parser.add_argument("--sampling-mode", dest="sampling_mode", choices=["random", "uncertainty", "structured", "structured-uncertainty"])
+    parser.add_argument("--sampling-mode", dest="sampling_mode", default="random", choices=["random", "uncertainty", "structured", "structured-uncertainty"])
     parser.add_argument("--training-mode", dest="training_mode", choices=["retrain", "incremental", "meta-incremental"])
     parser.add_argument("--window-size", dest="window_size", type=int)
 
@@ -60,11 +60,6 @@ def build_vocabs(config):
         for line in entity2id_file:
             entity, idx = line.strip().split("\t")
             entity2id[entity] = int(idx)
-
-    # with open(config.relation2id_path) as relation2id_file:
-    #     for line in relation2id_file:
-    #         relation, rel_idx = line.strip().split("\t")
-    #         relation2id[relation] = int(rel_idx)
 
     with open(config.relation2id_path) as relation2id_file:
         relations = relation2id_file.readlines()
