@@ -3,11 +3,11 @@ from numba import jit
 import argparse
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--entity', type=int, default=100)
-parser.add_argument('--relation', type=int, default=40)
+parser.add_argument('--entity', type=int, default=125)
+parser.add_argument('--relation', type=int, default=50)
 parser.add_argument('--lambda1', type=float, default=2.0)
 parser.add_argument('--lambda2', type=float, default=0.8)
-parser.add_argument('--known', type=int, default=100)
+parser.add_argument('--known', type=int, default=125)
 parser.add_argument('--seed', type=int, default=2024)
 parser.add_argument('--output_rule', type=str, default='rules.txt')
 parser.add_argument('--output_relation', type=str, default='relations.txt')
@@ -18,11 +18,13 @@ np.random.seed(args.seed)
 
 def generate_rule():
     total_triplets = np.random.poisson(args.lambda2) + 1
-    total_addition_entity = min(np.random.randint(0, min(total_triplets, 2 * total_triplets - 2) + 1), 3)
+    total_addition_entity = min(np.random.randint(0, 4), total_triplets - 1)
     total_relation = np.random.randint(1, min(total_triplets, args.relation) + 1)
     relations = np.random.choice(args.relation, total_relation, replace=False)
     Relation = np.random.choice(relations, total_triplets, replace=True)
-    Entity = np.concatenate([np.random.choice(total_addition_entity + 2, 2 * total_triplets - 2, replace=True), np.array([0, 1])]).reshape(-1, 2)
+    before_shuffle = np.concatenate([np.random.choice(total_addition_entity + 2, 2 * total_triplets - total_addition_entity - 2, replace=True), np.arange(total_addition_entity + 2)])
+    np.random.shuffle(before_shuffle)
+    Entity = before_shuffle.reshape(-1, 2)
     Rule = np.concatenate([Relation.reshape(-1, 1), Entity], axis=1)
     return Rule
 
