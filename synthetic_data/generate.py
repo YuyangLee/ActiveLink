@@ -9,7 +9,8 @@ parser.add_argument('--lambda1', type=float, default=2.0)
 parser.add_argument('--lambda2', type=float, default=0.8)
 parser.add_argument('--known', type=int, default=100)
 parser.add_argument('--seed', type=int, default=2024)
-parser.add_argument('--output', type=str, default='relations.txt')
+parser.add_argument('--output_rule', type=str, default='rules.txt')
+parser.add_argument('--output_relation', type=str, default='relations.txt')
 
 args = parser.parse_args()
 
@@ -35,7 +36,7 @@ for i in range(args.relation):
     All_Rules += generate_data(i)
 
 print(f"Generated {len(All_Rules)} rules")
-with open('rules.txt', 'w') as file:
+with open(args.output_rule, 'w') as file:
     for i, Rule in All_Rules:
         file.write(f"{i}\n")
         for row in Rule:
@@ -93,7 +94,7 @@ while True:
 
         # Try mapping pseudo entities to real entities
         mapping = np.zeros(number_pseudo_entities, dtype=np.int64) # Initialize the mapping
-        if try_mapping(Rule, list(known_relations), mapping, number_pseudo_entities):
+        if try_mapping(Rule, known_relations, mapping, number_pseudo_entities):
             # If a valid mapping is found, deduce the real relations
             # Create the new relation using the mapping of pseudo entities to real ones
             real_entity1 = mapping[0]
@@ -108,7 +109,7 @@ while True:
     known_relations.update(new_relations)
 
 # Writing the relations to a file
-with open(args.output, 'w') as file:
+with open(args.output_relation, 'w') as file:
     # First line: the number of relations
     file.write(f"{len(known_relations)}\n")
     
@@ -116,4 +117,4 @@ with open(args.output, 'w') as file:
     for relation in known_relations:
         file.write(f"{relation[0]} {relation[1]} {relation[2]}\n")
 
-print(f"Relations have been written to {args.output}")
+print(f"Relations have been written to {args.output_relation}")
