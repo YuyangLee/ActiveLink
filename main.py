@@ -92,8 +92,8 @@ def main():
     logger = wandb.init(project="active-learning-kgc", dir=log_dir, name=run_nametag, config=vars(config))
     
     # Percentage
-    # wandb.define_metric("train/completeness")
-    # wandb.define_metric("eval/*", step_metric="train/completeness")
+    wandb.define_metric("train/completeness")
+    wandb.define_metric("eval/*", step_metric="train/completeness")
 
     entity2id, rel2id = build_vocabs(config)
     log.info("Number of entities: {}".format(len(entity2id)))

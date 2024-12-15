@@ -28,6 +28,8 @@ class DataStreamer(object):
         self._entity2id = entity2id  # entity to id mapping
         self._rel2id = rel2id  # relation to id mapping
         self.use_all_data = use_all_data  # if True – iterator will return all data (last batch size <= self.batch_size)
+        
+        self._dataset_size = 0
 
         self.str2var = {}
     
@@ -53,6 +55,12 @@ class DataStreamer(object):
     @property
     def dataset_size(self):
         return len(self.data)
+        return self._dataset_size
+        return sum([len(d['e2_multi1']) for d in self.data])
+    
+    @property
+    def dataset_triplet_size(self):
+        return self._dataset_size
     
     def init_from_path(self, path):
         triplets = []
@@ -64,10 +72,12 @@ class DataStreamer(object):
                 triplets.append(triple_w_idx)
 
         self.data = triplets
+        self._dataset_size = sum([len(d['e2_multi1']) for d in self.data])
         self.get_multi_keys_length(triplets)
 
     def init_from_list(self, triplets):
         self.data = triplets
+        self._dataset_size = sum([len(d['e2_multi1']) for d in self.data])
         self.get_multi_keys_length(triplets)
 
     def get_multi_keys_length(self, triplets):
@@ -193,6 +203,7 @@ class DataSampleStreamer(DataStreamer):
             raise Exception("Unknown sampling method")
 
         self.data = initial_sample
+        self._dataset_size = sum([len(d['e2_multi1']) for d in self.data])
         self.update_triplet_map_from_data()
         self.get_multi_keys_length(initial_sample)
 
@@ -257,11 +268,13 @@ class DataSampleStreamer(DataStreamer):
 
     @property
     def curr_completeness(self):
-        return self.dataset_size / (self.dataset_size + len(self.remaining_data))
+        
+        remaining_dataset_size = sum([len(d['e2_multi1']) for d in self.remaining_data])
+        return self.dataset_triplet_size / (self.dataset_triplet_size + remaining_dataset_size)
 
     @property
     def curr_n_triplets(self):
-        return self.dataset_size
+        return self.dataset_triplet_size
 
     def update(self, model, logger):
         if self.sampling_mode == "omni_random":
@@ -281,6 +294,7 @@ class DataSampleStreamer(DataStreamer):
             raise Exception("Unknown sampling method")
 
         self.data.extend(current_sample)
+        self._dataset_size += sum([len(d['e2_multi1']) for d in current_sample])
         self.get_multi_keys_length(self.data)
 
         log.info("Training sample size: {}".format(self.dataset_size))
@@ -524,6 +538,10 @@ class DataTaskStreamer(DataSampleStreamer):
     @property
     def dataset_size(self):
         return sum([ task.dataset_size for task in self.tasks ])
+    
+    @property
+    def dataset_triplet_size(self):
+        return sum([ task.dataset_triplet_size for task in self.tasks ])
 
     def init_global_triplets(self):
         self.triplets = {}
