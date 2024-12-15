@@ -33,9 +33,9 @@ def parse_args():
     parser.add_argument("--sampling-mode", dest="sampling_mode", choices=["omni_random", "omni_t_uncer", "random", "r_uncer"])
     parser.add_argument("--training-mode", dest="training_mode", choices=["retrain", "incremental", "meta-incremental"])
     parser.add_argument("--window-size", dest="window_size", type=int)
-
-    return parser.parse_args()
-
+    
+    args = parser.parse_args()
+    return args
 
 def init_model(config, num_entities, num_relations):
     if config.model_name == "ConvE":
@@ -86,9 +86,9 @@ def build_vocabs(config):
 
 def main():
     args = parse_args()
-    run_nametag = f"ds={args.dataset}_mode={args.sampling_mode}_model={args.model_name}-{time_tag}"
 
     config = Config(args)
+    run_nametag = f"ds={config.dataset}_mode={config.sampling_mode}_model={config.model_name}-{time_tag}"
     logger = wandb.init(project="active-learning-kgc", dir=log_dir, name=run_nametag, config=vars(config))
     
     # Percentage
@@ -122,6 +122,7 @@ def main():
             config.sampling_mode,
         )
     train_batcher.init(config.train_path)
+    train_batcher.set_logger(logger)
 
     log.info("Initializing test_rank streamer")
     test_rank_batcher = DataStreamer(entity2id, rel2id, config.batch_size)

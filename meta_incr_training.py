@@ -179,7 +179,7 @@ def run_meta_incremental(config, model, train_batcher, test_rank_batcher, logger
             log.info("Evaluation: finished")
             log.info("Evaluation took {}".format(datetime.datetime.now() - eval_start_time))
 
-            early_stop_flag = early_stopping(mr, mr_opt, config.early_stop_threshold)
+            early_stop_flag = True #early_stopping(mr, mr_opt, config.early_stop_threshold)
 
             if mr < mr_opt:
                 model_opt = model

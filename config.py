@@ -23,7 +23,7 @@ class Config(object):
     eval_rate = 8  # run evaluation after each N epochs
     n_clusters = 1000
     sample_size = 1000  # number of training examples per one AL iteration
-    sampling_mode = 'omni_random'
+    sampling_mode = 'random'
     training_mode = 'meta-incremental'
     window_size = 10000
 

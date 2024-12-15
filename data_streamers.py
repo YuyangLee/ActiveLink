@@ -1,6 +1,6 @@
 # coding=utf-8
 from collections import defaultdict
-from enum import Enum
+from enum import Enum, Flag
 import json
 import logging
 import os
@@ -12,6 +12,7 @@ from sklearn.cluster import KMeans
 import torch
 from torch.autograd import Variable
 from torch.nn import functional as F
+from time import perf_counter
 
 log = logging.getLogger()
 
@@ -21,7 +22,7 @@ class DataStreamer(object):
         self.multi_entity_keys = {"e2_multi1", "e2_multi2"}
         self.multi_key_length = dict()  #
         self.batch_size = batch_size
-        self.data = []  # all triples
+        self.data = []  # all triplets
         self.batch_idx = 0
         self.device_id = torch.cuda.current_device()
         self._entity2id = entity2id  # entity to id mapping
@@ -29,6 +30,9 @@ class DataStreamer(object):
         self.use_all_data = use_all_data  # if True – iterator will return all data (last batch size <= self.batch_size)
 
         self.str2var = {}
+    
+    def set_logger(self, logger):
+        self.logger = logger
         
     @property
     def num_entities(self):
@@ -51,23 +55,23 @@ class DataStreamer(object):
         return len(self.data)
     
     def init_from_path(self, path):
-        triples = []
+        triplets = []
 
         with open(path) as f:
             for line in f:
                 triple = json.loads(line.strip())
                 triple_w_idx = self.tokens_to_ids(triple)
-                triples.append(triple_w_idx)
+                triplets.append(triple_w_idx)
 
-        self.data = triples
-        self.get_multi_keys_length(triples)
+        self.data = triplets
+        self.get_multi_keys_length(triplets)
 
     def init_from_list(self, triplets):
         self.data = triplets
         self.get_multi_keys_length(triplets)
 
-    def get_multi_keys_length(self, triples):
-        for triple in triples:
+    def get_multi_keys_length(self, triplets):
+        for triple in triplets:
             for key in self.multi_entity_keys:
                 if key in triple:
                     assert isinstance(triple[key], list)
@@ -76,11 +80,11 @@ class DataStreamer(object):
                         len(triple[key])
                     )
 
-    def preprocess(self, triples):
+    def preprocess(self, triplets):
         ent_rel_dict = defaultdict(list)
 
         # list of dicts -> dict of lists
-        for triple in triples:
+        for triple in triplets:
             for key, value in triple.items():
                 if not isinstance(value, list):
                     new_value = [value]
@@ -158,16 +162,8 @@ class DataStreamer(object):
     def __next__(self):
         return self.next()
 
-class StripletStatus(Enum):
-    UNKNOWN = 0       # 00
-    UNKNOWN_FALSE = 0 # 00
-    UNKNOWN_TRUE = 1  # 01
-    KNOWN = 2         # 10
-    KNOWN_FALSE = 2   # 10
-    KNOWN_TRUE = 3    # 11
-
 class DataSampleStreamer(DataStreamer):
-    def __init__(self, entity_embed_path, entity2id, rel2id, n_clusters, batch_size, sample_size, sampling_mode, sparse_mat: bool = True):
+    def __init__(self, entity_embed_path, entity2id, rel2id, n_clusters, batch_size, sample_size, sampling_mode):
         super(DataSampleStreamer, self).__init__(entity2id, rel2id, batch_size)
         self.entity_embed_path = entity_embed_path
         self.sample_size = sample_size
@@ -177,15 +173,6 @@ class DataSampleStreamer(DataStreamer):
         self.data = []
         self.remaining_data = []
         
-        # if sparse_mat:
-        #     from scipy.sparse import coo_matrix
-        #     self.triplets = coo_matrix(([], ([], [])), shape=(self.num_entities, self.num_relations, self.num_entities))
-        #     # TODO: Set Diag
-        #     # TODO: Mark test triplets
-        # else:
-        #     self.triplets = np.eye(self.num_entities, dtype=np.int8)[:, None].repeat(self.num_relations, axis=1).repeat(self.num_entities, axis=2) * StripletStatus.KNOWN_FALSE
-            
-            # TODO: Mark test triplets
 
     def init(self, path):
         if self.sampling_mode == "omni_random":
@@ -212,22 +199,23 @@ class DataSampleStreamer(DataStreamer):
         log.info("Training sample size: {}".format(self.dataset_size))
 
     def init_random(self, path):
-        triples = []
+        triplets = []
         with open(path) as f:
             for line in f:
                 triple = json.loads(line.strip())
                 triple_w_ids = self.tokens_to_ids(triple)
-                triples.append(triple_w_ids)
+                triplets.append(triple_w_ids)
 
-        random.shuffle(triples)
-        sample, self.remaining_data = triples[:self.sample_size], triples[self.sample_size:]
+        random.shuffle(triplets)
+        sample, self.remaining_data = triplets[:self.sample_size], triplets[self.sample_size:]
 
         return sample
 
     def update_triplet_map_from_data(self):
         for triple in self.data:
             e1, rel, e2 = triple["e1"], triple["rel"], triple["e2"]
-            self.triplets[e1, rel, e2] = StripletStatus.UNKNOWN_TRUE
+            self.triplets[e1, rel, e2] = TripletStatus.KNOWN_TRUE
+            
             
     def init_w_clustering(self, path):
         self.build_clusters(path)
@@ -235,14 +223,14 @@ class DataSampleStreamer(DataStreamer):
         empty_clusters = []
         initial_sample = []
 
-        triples_per_cluster = int(
+        triplets_per_cluster = int(
             round(
                 self.sample_size / len(self.clusters)
             )
         )
 
-        if triples_per_cluster == 0:
-            triples_per_cluster = 1
+        if triplets_per_cluster == 0:
+            triplets_per_cluster = 1
 
         stop_sampling = False
 
@@ -250,7 +238,7 @@ class DataSampleStreamer(DataStreamer):
             if stop_sampling:
                 end_index = 0
             else:
-                end_index = min(triples_per_cluster, len(cluster_data))
+                end_index = min(triplets_per_cluster, len(cluster_data))
             random.shuffle(cluster_data)
             initial_sample.extend(cluster_data[:end_index])
 
@@ -275,7 +263,7 @@ class DataSampleStreamer(DataStreamer):
     def curr_n_triplets(self):
         return self.dataset_size
 
-    def update(self, model):
+    def update(self, model, logger):
         if self.sampling_mode == "omni_random":
             current_sample = self.update_omni_random()
         elif self.sampling_mode == "omni_t_uncer":
@@ -338,32 +326,6 @@ class DataSampleStreamer(DataStreamer):
 
         return current_sample
     
-    def simulate_query(self, heads, rels, tails):
-        self.triplets[heads, rels, tails] |= 0b10 # Turn unknown to known
-        n_false, n_true = (self.triplets[heads, rels, tails] * 0b10).sum(), (self.triplets[heads, rels, tails] * 0b11).sum()
-        print(f"Queried {len(heads)} triplets. True triplet hit rate = {(n_true / len(heads) * 100):.4f}%")
-        
-        # Return positive samples
-        # TODO: Return negative samples for better training
-        return [
-            {"e1": e1, "rel": rel, "e2": e2 }
-            for e1, rel, e2 in zip (heads, rels, tails) if self.triplets[heads, rels, tails] == StripletStatus.KNOWN_TRUE
-        ]
-    
-    def update_random(self):
-        current_sample = []
-        
-        N_SAMPLES = 10000
-        
-        sampled_heads = np.random.choice(self.num_entities, N_SAMPLES)
-        sampled_rels = np.random.choice(self.num_relations, N_SAMPLES)
-        sampled_tails = np.random.choice(self.num_entities, N_SAMPLES)
-
-        valid = (sampled_heads != sampled_tails) * (self.triplets[sampled_heads, sampled_rels, sampled_tails] & StripletStatus.UNKNOWN)        
-        self.simulate_query(sampled_heads[valid], sampled_rels[valid], sampled_tails[valid])
-        
-        # current_sample = 
-
     def update_r_uncer(self, model):
         current_sample = []
 
@@ -541,9 +503,15 @@ class DataSampleStreamer(DataStreamer):
         return uncertainty
 
 
+class TripletStatus(Flag):
+    UNKNOWN_FALSE = 0 # 00
+    UNKNOWN_TRUE = 1  # 01
+    KNOWN_FALSE = 2   # 10
+    KNOWN_TRUE = 3    # 11
+
 class DataTaskStreamer(DataSampleStreamer):
     def __init__(self, entity_embed_path, entity2id, rel2id, n_clusters, batch_size, sample_size, window_size, sampling_mode):
-        super(DataTaskStreamer, self).__init__(entity_embed_path, entity2id, rel2id, n_clusters, batch_size, sample_size, sampling_mode, False) # False is DEBUG
+        super(DataTaskStreamer, self).__init__(entity_embed_path, entity2id, rel2id, n_clusters, batch_size, sample_size, sampling_mode) # False is DEBUG
         self.entity_embed_path = entity_embed_path
         self.sample_size = sample_size
         self.window_size = window_size
@@ -557,6 +525,83 @@ class DataTaskStreamer(DataSampleStreamer):
     def dataset_size(self):
         return sum([ task.dataset_size for task in self.tasks ])
 
+    def init_global_triplets(self):
+        self.triplets = {}
+        # from scipy.sparse import coo_matrix
+        # self.triplets = coo_matrix(([], ([], [])), shape=(self.num_entities, self.num_relations, self.num_entities), dtype=np.int8)
+        
+    # The triplet:
+    # Not in the dict -> FALSE
+    # In the dict -> TRUE
+    def register_triplet_states(self, triplets, is_known=True):
+        for triplet in triplets:
+            e1, rel = triplet["e1"], triplet["rel"]
+            if "e2_multi1" in triplet:
+                for e2 in triplet["e2_multi1"]:
+                    self.triplets[(e1, rel, e2)] = TripletStatus.KNOWN_TRUE if is_known else TripletStatus.UNKNOWN_TRUE
+            else:
+                self.triplets[(e1, rel,  triplet["e2"])] = TripletStatus.KNOWN_TRUE if is_known else TripletStatus.UNKNOWN_TRUE
+        
+    def simulate_query(self, heads, rels, tails, inplace=True):
+        added_samples = []
+        n_hit = 0
+        for head, rel, tail in zip(heads, rels, tails):
+            
+            if not (head, rel, tail) in self.triplets:
+                # n_hit += 1
+                # Failed query for being really FALSE
+                # self.triplets[(head, rel, tail)] = TripletStatus.KNOWN_FALSE
+                continue
+            
+            if inplace:
+                self.triplets[(head, rel, tail)] |= TripletStatus.KNOWN_FALSE # Unkown -> Known
+            
+            if (self.triplets[(head, rel, tail)] & TripletStatus.UNKNOWN_TRUE).value:
+                # n_hit += 1
+                added_samples.append({ "e1": head, "rel": rel, "e2_multi1": [tail] })
+                # added_samples.append({ "e1": head, "rel": rel, "e2": tail })
+            
+        return n_hit, added_samples        
+    
+    def update_random(self):
+        current_sample = []
+        
+        N_SAMPLES_PER_TIME = 10000
+        MAX_TURNS = 100000
+        
+        start_time = perf_counter()
+        n_hit = 0
+        
+        for i in range(MAX_TURNS):
+            sampled_heads = np.random.choice(self.num_entities, N_SAMPLES_PER_TIME)
+            sampled_rels = np.random.choice(self.num_relations, N_SAMPLES_PER_TIME)
+            sampled_tails = np.random.choice(self.num_entities, N_SAMPLES_PER_TIME)
+            # valid = (sampled_heads != sampled_tails) * (self.triplets[sampled_heads, sampled_rels, sampled_tails] & StripletStatus.UNKNOWN)        
+            valid = (sampled_heads != sampled_tails)
+            n_hit_turn, result_queries = self.simulate_query(sampled_heads[valid], sampled_rels[valid], sampled_tails[valid])
+            n_hit += n_hit_turn
+            
+            current_sample += result_queries
+            if i % 1000 == 999:
+                elapsed_time = perf_counter() - start_time
+                curr_pos_hitrate = len(current_sample) / (N_SAMPLES_PER_TIME * (i+1))
+                # curr_hitrate = n_hit / (N_SAMPLES_PER_TIME * (i+1))
+                print(f"Turn {i + 1}: Totally {len(current_sample)} samples added; PHR = {(curr_pos_hitrate * 1000):.4f}‰; Time elapsed = {elapsed_time:.2f}s")
+                # print(f"Turn {i + 1}: Totally {len(current_sample)} samples added; HR = {(curr_pos_hitrate * 1000):.4f}‰ PHR = {(curr_hitrate * 1000):.4f}‰; Time elapsed = {elapsed_time:.2f}s")
+            
+            if len(current_sample) > self.sample_size:
+                elapsed_time = perf_counter() - start_time
+                curr_hitrate = len(current_sample) / (N_SAMPLES_PER_TIME * (i+1))
+                # curr_pos_hitrate = len(current_sample) / (N_SAMPLES_PER_TIME * (i+1))
+                self.logger.log({
+                    "annot/time": elapsed_time,
+                    "annot/pos_hitrate": curr_pos_hitrate,
+                    # "annot/hitrate": curr_hitrate,
+                })
+                break
+            
+        return current_sample
+
     def init(self, path):
         if self.sampling_mode == "omni_random":
             initial_sample = self.init_random(path)
@@ -564,15 +609,21 @@ class DataTaskStreamer(DataSampleStreamer):
             initial_sample = self.init_random(path)
         elif self.sampling_mode == "random":
             initial_sample = self.init_random(path)
+            self.init_global_triplets()
+            self.register_triplet_states(initial_sample)
+            self.register_triplet_states(self.remaining_data, False)
         elif self.sampling_mode == "r_uncer":
             initial_sample = self.init_random(path)
-        # elif self.sampling_mode == "structured":
-        #     initial_sample = self.init_w_clustering(path)
-        # elif self.sampling_mode == "structured-uncertainty":
-        #     initial_sample = self.init_w_clustering(path)
+            self.init_global_triplets()
+            self.register_triplet_states(initial_sample)
+            self.register_triplet_states(self.remaining_data, False)
+        elif self.sampling_mode == "structured":
+            initial_sample = self.init_w_clustering(path)
+        elif self.sampling_mode == "structured-uncertainty":
+            initial_sample = self.init_w_clustering(path)
         else:
             raise Exception("Unknown sampling method")
-
+        
         task = DataStreamer(self.entity2id, self.rel2id, self.batch_size)
         task.init_from_list(initial_sample)
         self.tasks.append(task)
@@ -586,14 +637,14 @@ class DataTaskStreamer(DataSampleStreamer):
             current_sample = self.update_omni_random()
         elif self.sampling_mode == "omni_t_uncer":
             current_sample = self.update_omni_t_uncert(model)
-        elif self.sampling_mode == "random_by_query":
+        elif self.sampling_mode == "random":
             current_sample = self.update_random()
-        elif self.sampling_mode == "relation_uncert_by_query":
+        elif self.sampling_mode == "relation_uncert":
             current_sample = self.update_r_uncer()
-        # elif self.sampling_mode == "structured":
-        #     current_sample = self.update_clustering()
-        # elif self.sampling_mode == "structured-uncertainty":
-        #     current_sample = self.update_uncert_w_clustering(model)
+        elif self.sampling_mode == "structured":
+            current_sample = self.update_clustering()
+        elif self.sampling_mode == "structured-uncertainty":
+            current_sample = self.update_uncert_w_clustering(model)
         else:
             raise Exception("Unknown sampling method")
 
@@ -605,10 +656,10 @@ class DataTaskStreamer(DataSampleStreamer):
         # self.dataset_size += len(current_sample)
 
         log.info("Training sample size: {}".format(self.dataset_size))
-
+        
     def __iter__(self):
         return self
-
+    
     def next(self):
         if self.task_idx * (-1) <= len(self.tasks) and self.task_idx * (-1) <= self.window_size:
             current_task = self.tasks[self.task_idx]
@@ -617,6 +668,3 @@ class DataTaskStreamer(DataSampleStreamer):
         else:
             self.task_idx = -1
             raise StopIteration
-
-    # def __iter__(self):
-    #     return self.next()
