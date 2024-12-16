@@ -1,0 +1,400 @@
+Finish initializing...
+0.4189189076423645
+Input Files Path : ./data/data_split0/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split0/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.085623 	 43.297298 	 0.405405 	 0.054054 	 0.000000 
+r(raw):			 0.102844 	 42.459461 	 0.432432 	 0.081081 	 0.000000 
+averaged(raw):		 0.094233 	 42.878380 	 0.418919 	 0.067568 	 0.000000 
+
+l(filter):		 0.085639 	 43.216217 	 0.405405 	 0.054054 	 0.000000 
+r(filter):		 0.102876 	 42.270271 	 0.432432 	 0.081081 	 0.000000 
+averaged(filter):	 0.094258 	 42.743244 	 0.418919 	 0.067568 	 0.000000 
+0.418919
+Finish initializing...
+0.45945948362350464
+Input Files Path : ./data/data_split1/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split1/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.110537 	 37.378380 	 0.486486 	 0.027027 	 0.000000 
+r(raw):			 0.096785 	 39.135136 	 0.432432 	 0.000000 	 0.000000 
+averaged(raw):		 0.103661 	 38.256760 	 0.459459 	 0.013514 	 0.000000 
+
+l(filter):		 0.110549 	 37.270271 	 0.486486 	 0.027027 	 0.000000 
+r(filter):		 0.096841 	 39.081081 	 0.432432 	 0.000000 	 0.000000 
+averaged(filter):	 0.103695 	 38.175674 	 0.459459 	 0.013514 	 0.000000 
+0.459459
+Finish initializing...
+0.4324324131011963
+Input Files Path : ./data/data_split10/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split10/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.095240 	 38.756756 	 0.405405 	 0.000000 	 0.000000 
+r(raw):			 0.131600 	 34.243244 	 0.459459 	 0.054054 	 0.027027 
+averaged(raw):		 0.113420 	 36.500000 	 0.432432 	 0.027027 	 0.013514 
+
+l(filter):		 0.095251 	 38.729729 	 0.405405 	 0.000000 	 0.000000 
+r(filter):		 0.131614 	 34.108109 	 0.459459 	 0.054054 	 0.027027 
+averaged(filter):	 0.113433 	 36.418919 	 0.432432 	 0.027027 	 0.013514 
+0.432432
+Finish initializing...
+0.31081080436706543
+Input Files Path : ./data/data_split11/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split11/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.098778 	 40.621620 	 0.324324 	 0.054054 	 0.000000 
+r(raw):			 0.079218 	 39.810810 	 0.297297 	 0.000000 	 0.000000 
+averaged(raw):		 0.088998 	 40.216217 	 0.310811 	 0.027027 	 0.000000 
+
+l(filter):		 0.098824 	 40.594593 	 0.324324 	 0.054054 	 0.000000 
+r(filter):		 0.079293 	 39.675674 	 0.297297 	 0.000000 	 0.000000 
+averaged(filter):	 0.089058 	 40.135132 	 0.310811 	 0.027027 	 0.000000 
+0.310811
+Finish initializing...
+0.4324324429035187
+Input Files Path : ./data/data_split12/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split12/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.084979 	 35.135136 	 0.486486 	 0.000000 	 0.000000 
+r(raw):			 0.080912 	 40.513512 	 0.378378 	 0.027027 	 0.000000 
+averaged(raw):		 0.082946 	 37.824326 	 0.432432 	 0.013514 	 0.000000 
+
+l(filter):		 0.085287 	 35.027027 	 0.486486 	 0.000000 	 0.000000 
+r(filter):		 0.080960 	 40.459461 	 0.378378 	 0.027027 	 0.000000 
+averaged(filter):	 0.083123 	 37.743244 	 0.432432 	 0.013514 	 0.000000 
+0.432432
+Finish initializing...
+0.3918918967247009
+Input Files Path : ./data/data_split13/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split13/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.365148 	 44.540539 	 0.378378 	 0.378378 	 0.324324 
+r(raw):			 0.339687 	 46.081081 	 0.405405 	 0.351351 	 0.297297 
+averaged(raw):		 0.352418 	 45.310810 	 0.391892 	 0.364865 	 0.310811 
+
+l(filter):		 0.365156 	 44.459461 	 0.378378 	 0.378378 	 0.324324 
+r(filter):		 0.339738 	 45.891891 	 0.405405 	 0.351351 	 0.297297 
+averaged(filter):	 0.352447 	 45.175674 	 0.391892 	 0.364865 	 0.310811 
+0.391892
+Finish initializing...
+0.13513512909412384
+Input Files Path : ./data/data_split14/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split14/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.050837 	 52.513512 	 0.162162 	 0.027027 	 0.000000 
+r(raw):			 0.040350 	 57.243244 	 0.108108 	 0.027027 	 0.000000 
+averaged(raw):		 0.045594 	 54.878380 	 0.135135 	 0.027027 	 0.000000 
+
+l(filter):		 0.050893 	 52.297298 	 0.162162 	 0.027027 	 0.000000 
+r(filter):		 0.040406 	 57.027027 	 0.108108 	 0.027027 	 0.000000 
+averaged(filter):	 0.045649 	 54.662163 	 0.135135 	 0.027027 	 0.000000 
+0.135135
+Finish initializing...
+0.6216216087341309
+Input Files Path : ./data/data_split15/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split15/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.282176 	 20.837837 	 0.567568 	 0.513514 	 0.000000 
+r(raw):			 0.319354 	 18.108109 	 0.675676 	 0.567568 	 0.027027 
+averaged(raw):		 0.300765 	 19.472973 	 0.621622 	 0.540541 	 0.013514 
+
+l(filter):		 0.282221 	 20.783783 	 0.567568 	 0.513514 	 0.000000 
+r(filter):		 0.319680 	 18.027027 	 0.675676 	 0.567568 	 0.027027 
+averaged(filter):	 0.300950 	 19.405405 	 0.621622 	 0.540541 	 0.013514 
+0.621622
+Finish initializing...
+0.29729729890823364
+Input Files Path : ./data/data_split16/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split16/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.065762 	 48.918919 	 0.324324 	 0.027027 	 0.000000 
+r(raw):			 0.049093 	 47.459461 	 0.270270 	 0.027027 	 0.000000 
+averaged(raw):		 0.057428 	 48.189190 	 0.297297 	 0.027027 	 0.000000 
+
+l(filter):		 0.066057 	 48.702702 	 0.324324 	 0.027027 	 0.000000 
+r(filter):		 0.049228 	 47.270271 	 0.270270 	 0.027027 	 0.000000 
+averaged(filter):	 0.057643 	 47.986488 	 0.297297 	 0.027027 	 0.000000 
+0.297297
+Finish initializing...
+0.3918918967247009
+Input Files Path : ./data/data_split17/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split17/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.109361 	 45.432434 	 0.351351 	 0.054054 	 0.027027 
+r(raw):			 0.133455 	 44.000000 	 0.432432 	 0.081081 	 0.027027 
+averaged(raw):		 0.121408 	 44.716217 	 0.391892 	 0.067568 	 0.027027 
+
+l(filter):		 0.109412 	 45.216217 	 0.351351 	 0.054054 	 0.027027 
+r(filter):		 0.133517 	 43.837837 	 0.432432 	 0.081081 	 0.027027 
+averaged(filter):	 0.121464 	 44.527027 	 0.391892 	 0.067568 	 0.027027 
+0.391892
+Finish initializing...
+0.31081080436706543
+Input Files Path : ./data/data_split18/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split18/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.142501 	 40.189190 	 0.324324 	 0.081081 	 0.054054 
+r(raw):			 0.085776 	 42.891891 	 0.297297 	 0.000000 	 0.000000 
+averaged(raw):		 0.114138 	 41.540543 	 0.310811 	 0.040541 	 0.027027 
+
+l(filter):		 0.142637 	 40.000000 	 0.324324 	 0.081081 	 0.054054 
+r(filter):		 0.085883 	 42.756756 	 0.297297 	 0.000000 	 0.000000 
+averaged(filter):	 0.114260 	 41.378380 	 0.310811 	 0.040541 	 0.027027 
+0.310811
+Finish initializing...
+0.3513513505458832
+Input Files Path : ./data/data_split19/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split19/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.066134 	 44.135136 	 0.324324 	 0.027027 	 0.000000 
+r(raw):			 0.084539 	 50.891891 	 0.351351 	 0.054054 	 0.027027 
+averaged(raw):		 0.075336 	 47.513512 	 0.337838 	 0.040541 	 0.013514 
+
+l(filter):		 0.066436 	 43.972973 	 0.351351 	 0.027027 	 0.000000 
+r(filter):		 0.084554 	 50.810810 	 0.351351 	 0.054054 	 0.027027 
+averaged(filter):	 0.075495 	 47.391891 	 0.351351 	 0.040541 	 0.013514 
+0.351351
+Finish initializing...
+0.37837839126586914
+Input Files Path : ./data/data_split2/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split2/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.132699 	 36.810810 	 0.351351 	 0.270270 	 0.000000 
+r(raw):			 0.141727 	 36.918919 	 0.378378 	 0.216216 	 0.027027 
+averaged(raw):		 0.137213 	 36.864864 	 0.364865 	 0.243243 	 0.013514 
+
+l(filter):		 0.132712 	 36.783783 	 0.351351 	 0.270270 	 0.000000 
+r(filter):		 0.142004 	 36.729729 	 0.405405 	 0.216216 	 0.027027 
+averaged(filter):	 0.137358 	 36.756756 	 0.378378 	 0.243243 	 0.013514 
+0.378378
+Finish initializing...
+0.31081080436706543
+Input Files Path : ./data/data_split3/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split3/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.065771 	 42.027027 	 0.297297 	 0.027027 	 0.000000 
+r(raw):			 0.059479 	 54.324326 	 0.324324 	 0.027027 	 0.000000 
+averaged(raw):		 0.062625 	 48.175674 	 0.310811 	 0.027027 	 0.000000 
+
+l(filter):		 0.066228 	 41.864864 	 0.297297 	 0.027027 	 0.000000 
+r(filter):		 0.059829 	 54.081081 	 0.324324 	 0.027027 	 0.000000 
+averaged(filter):	 0.063028 	 47.972973 	 0.310811 	 0.027027 	 0.000000 
+0.310811
+Finish initializing...
+0.31081080436706543
+Input Files Path : ./data/data_split4/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split4/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.179210 	 51.864864 	 0.324324 	 0.297297 	 0.027027 
+r(raw):			 0.153390 	 42.108109 	 0.297297 	 0.270270 	 0.000000 
+averaged(raw):		 0.166300 	 46.986488 	 0.310811 	 0.283784 	 0.013514 
+
+l(filter):		 0.179215 	 51.810810 	 0.324324 	 0.297297 	 0.027027 
+r(filter):		 0.153439 	 42.000000 	 0.297297 	 0.270270 	 0.000000 
+averaged(filter):	 0.166327 	 46.905403 	 0.310811 	 0.283784 	 0.013514 
+0.310811
+Finish initializing...
+0.2702702581882477
+Input Files Path : ./data/data_split5/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split5/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.125630 	 46.621620 	 0.270270 	 0.270270 	 0.027027 
+r(raw):			 0.094276 	 47.675674 	 0.270270 	 0.216216 	 0.000000 
+averaged(raw):		 0.109953 	 47.148647 	 0.270270 	 0.243243 	 0.013514 
+
+l(filter):		 0.125649 	 46.459461 	 0.270270 	 0.270270 	 0.027027 
+r(filter):		 0.094318 	 47.567566 	 0.270270 	 0.216216 	 0.000000 
+averaged(filter):	 0.109983 	 47.013512 	 0.270270 	 0.243243 	 0.013514 
+0.270270
+Finish initializing...
+0.36486488580703735
+Input Files Path : ./data/data_split6/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split6/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.083793 	 47.972973 	 0.378378 	 0.027027 	 0.000000 
+r(raw):			 0.070366 	 47.054054 	 0.351351 	 0.000000 	 0.000000 
+averaged(raw):		 0.077079 	 47.513512 	 0.364865 	 0.013514 	 0.000000 
+
+l(filter):		 0.083981 	 47.810810 	 0.378378 	 0.027027 	 0.000000 
+r(filter):		 0.070396 	 46.864864 	 0.351351 	 0.000000 	 0.000000 
+averaged(filter):	 0.077189 	 47.337837 	 0.364865 	 0.013514 	 0.000000 
+0.364865
+Finish initializing...
+0.337837815284729
+Input Files Path : ./data/data_split7/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split7/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.056933 	 46.243244 	 0.324324 	 0.000000 	 0.000000 
+r(raw):			 0.065557 	 41.675674 	 0.351351 	 0.027027 	 0.000000 
+averaged(raw):		 0.061245 	 43.959457 	 0.337838 	 0.013514 	 0.000000 
+
+l(filter):		 0.057060 	 46.162163 	 0.324324 	 0.000000 	 0.000000 
+r(filter):		 0.065664 	 41.567566 	 0.351351 	 0.027027 	 0.000000 
+averaged(filter):	 0.061362 	 43.864864 	 0.337838 	 0.013514 	 0.000000 
+0.337838
+Finish initializing...
+0.3918918967247009
+Input Files Path : ./data/data_split8/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split8/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.059778 	 52.864864 	 0.351351 	 0.000000 	 0.000000 
+r(raw):			 0.073387 	 46.270271 	 0.432432 	 0.000000 	 0.000000 
+averaged(raw):		 0.066582 	 49.567566 	 0.391892 	 0.000000 	 0.000000 
+
+l(filter):		 0.059884 	 52.729729 	 0.351351 	 0.000000 	 0.000000 
+r(filter):		 0.073395 	 46.189190 	 0.432432 	 0.000000 	 0.000000 
+averaged(filter):	 0.066640 	 49.459457 	 0.391892 	 0.000000 	 0.000000 
+0.391892
+Finish initializing...
+0.37837839126586914
+Input Files Path : ./data/data_split9/
+The toolkit is importing datasets.
+The total of relations is 50.
+The total of entities is 105.
+The total of train triples is 292.
+Input Files Path : ./data/data_split9/
+The total of test triples is 37.
+The total of valid triples is 36.
+no type constraint results:
+metric:			 MRR 		 MR 		 hit@10 	 hit@3  	 hit@1 
+l(raw):			 0.080113 	 31.783783 	 0.378378 	 0.027027 	 0.000000 
+r(raw):			 0.074477 	 36.675674 	 0.378378 	 0.000000 	 0.000000 
+averaged(raw):		 0.077295 	 34.229729 	 0.378378 	 0.013514 	 0.000000 
+
+l(filter):		 0.080130 	 31.729731 	 0.378378 	 0.027027 	 0.000000 
+r(filter):		 0.074489 	 36.567566 	 0.378378 	 0.000000 	 0.000000 
+averaged(filter):	 0.077310 	 34.148647 	 0.378378 	 0.013514 	 0.000000 
+0.378378
