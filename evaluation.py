@@ -98,6 +98,11 @@ def ranking_and_hits(model, dev_rank_batcher, batch_size, name, silent=False):
         log.info('Hits @10: %f', np.mean(hits[9]))
         log.info('Mean rank: %f', np.mean(ranks))
         log.info('Mean reciprocal rank: %f', np.mean(1. / np.array(ranks)))
-
-    return np.mean(ranks)
+    
+    return {
+        "hit_1": np.mean(hits[0]),
+        "hit_10": np.mean(hits[9]),
+        "mr": np.mean(ranks),
+        "mrr": np.mean(1. / np.array(ranks))
+    }
 

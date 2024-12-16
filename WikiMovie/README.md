@@ -16,7 +16,7 @@ Raw wikidata dump in json format, one record per line (can be downloaded from he
 
 ## Output
 ### graph
-A file containing triples, one triple per line\
+A file containing triplets, one triple per line\
 Format: `<head_entity>\t<relation>\t<tai_entity>`
 
 Example:  
@@ -48,14 +48,14 @@ Make a dataset from the full knowledge graph built by `build_movie_graph.py` and
 `--preprocess` preprocess graph
 
 Graph preprocessing:
-* Remove uninformative triples (e.g. with IS_INSTANCE relation)
-* Remove reverse triples (we add them later in ActiveLink framework)
+* Remove uninformative triplets (e.g. with IS_INSTANCE relation)
+* Remove reverse triplets (we add them later in ActiveLink framework)
 * Remove "poor" heads (with less than 5 outgoing edges) – an attempt to make the graph more dense
 
 Split ratio can be changed (`TRAINING_SET_RATIO`, `TEST_SET_RATIO` and `VALIDATION_SET_RATIO` variables in the script).
 
 We are trying to make the dataset as dense as possible (i.e. keep the number of entities and relations low), but the actual density depends on the target dataset size. 
-The density is controlled by two parameters – `ENTITIES_DENSITY` and `RELATIONS_DENSITY` (the number of entities/relations to the number of training samples). Their values are fitted empirically and should be increased in case there is not enough triples in the graph to keep this density level.  
+The density is controlled by two parameters – `ENTITIES_DENSITY` and `RELATIONS_DENSITY` (the number of entities/relations to the number of training samples). Their values are fitted empirically and should be increased in case there is not enough triplets in the graph to keep this density level.  
 
 ## Input
 File with movie knowledge graph built by `build_movie_graph.py`
