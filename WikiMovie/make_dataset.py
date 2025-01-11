@@ -18,13 +18,13 @@ def preprocess_graph(graph_file):
     entity_pair_to_triple = defaultdict(set)
     head_to_rels = defaultdict(set)
     all_entity_pairs = set()
-    final_triples = []
+    final_triplets = []
     final_entities = set()
 
     i = 0
     j = 0
 
-    # remove triples with IS_INSTANCE relation
+    # remove triplets with IS_INSTANCE relation
     with open(graph_file) as raw_data:
         for line in raw_data:
             e1, rel, e2 = line.strip().split("\t")
@@ -36,7 +36,7 @@ def preprocess_graph(graph_file):
             else:
                 j += 1
 
-    # remove reverse triples
+    # remove reverse triplets
     for e1, e2 in all_entity_pairs:
         if (e2, e1) in all_entity_pairs:
             if len(entity_pair_to_triple[(e1, e2)]) >= len(entity_pair_to_triple[(e2, e1)]):
@@ -49,14 +49,14 @@ def preprocess_graph(graph_file):
     # remove nodes with less than 5 outgoing edges
     for e1, e2 in entity_pair_to_triple:
         if e1 not in poor_heads:
-            final_triples.append(entity_pair_to_triple[(e1, e2)])
+            final_triplets.append(entity_pair_to_triple[(e1, e2)])
             final_entities.add(e1)
             final_entities.add(e2)
 
     output_file = os.path.join(os.path.dirname(graph_file), "graph_filtered")
     with open(output_file, "w") as out:
-        for set_of_triples in final_triples:
-            for triple in set_of_triples:
+        for set_of_triplets in final_triplets:
+            for triple in set_of_triplets:
                 out.write(triple)
 
     return output_file
@@ -104,8 +104,8 @@ def make_training_set(full_graph, dataset_size):
     return dataset, entities, relations
 
 
-def get_valid_triples_for_testing(full_graph, training_set, trained_entities, trained_relations):
-    valid_triples = set()
+def get_valid_triplets_for_testing(full_graph, training_set, trained_entities, trained_relations):
+    valid_triplets = set()
 
     with open(full_graph) as raw_data:
         for line in raw_data:
@@ -117,19 +117,19 @@ def get_valid_triples_for_testing(full_graph, training_set, trained_entities, tr
             if head not in trained_entities or tail not in trained_entities or relation not in trained_relations:
                 continue
 
-            valid_triples.add(line)
+            valid_triplets.add(line)
 
-    return valid_triples
+    return valid_triplets
 
 
-def make_test_sets(dataset_size, triples):
+def make_test_sets(dataset_size, triplets):
     test_set = set()
     valid_set = set()
 
     test_set_size = dataset_size*TEST_SET_RATIO
     valid_set_size = dataset_size*VALIDATION_SET_RATIO
 
-    raw_data_size = len(triples)
+    raw_data_size = len(triplets)
     test_sets_size = test_set_size + valid_set_size
 
     if raw_data_size > test_sets_size:
@@ -143,7 +143,7 @@ def make_test_sets(dataset_size, triples):
     else:
         raise Exception
 
-    for triple in triples:
+    for triple in triplets:
         is_test, is_valid, skip = np.random.multinomial(1, [test_ratio, valid_ratio, skip_ratio])
 
         if is_test:
@@ -175,8 +175,8 @@ def main():
     while retry < MAX_RETRIES:
         try:
             training_set, training_entities, training_relations = make_training_set(full_graph, args.dataset_size)
-            valid_triples = get_valid_triples_for_testing(full_graph, training_set, training_entities, training_relations)
-            test_set, valid_set = make_test_sets(args.dataset_size, valid_triples)
+            valid_triplets = get_valid_triplets_for_testing(full_graph, training_set, training_entities, training_relations)
+            test_set, valid_set = make_test_sets(args.dataset_size, valid_triplets)
             break
         except:
             retry += 1

@@ -137,7 +137,7 @@ def run_inner(config, model, task):
     return meta_grads
 
 
-def run_meta_incremental(config, model, train_batcher, test_rank_batcher):
+def run_meta_incremental(config, model, train_batcher, test_rank_batcher, logger=None):
     opt = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
 
     mr_opt = float('inf')
@@ -157,8 +157,14 @@ def run_meta_incremental(config, model, train_batcher, test_rank_batcher):
         for task in train_batcher.tasks:
             g = run_inner(config, model, task)
             grads.append(g)
+        loop_time = datetime.datetime.now() - inner_loop_start,
         log.info("Inner loop: finished")
-        log.info("Inner loop took {}".format(datetime.datetime.now() - inner_loop_start))
+        log.info("Inner loop took {}".format(loop_time))
+        
+        logger.log({
+            "train/n_triplets": train_batcher.curr_n_triplets,
+            "train/completeness": train_batcher.curr_completeness
+        })
 
         # Perform the meta update
         perform_meta_update(config, test_rank_batcher, model, grads, opt)
@@ -167,15 +173,19 @@ def run_meta_incremental(config, model, train_batcher, test_rank_batcher):
             model.eval()
             log.info("Evaluation: started")
             eval_start_time = datetime.datetime.now()
-            mr = ranking_and_hits(model, test_rank_batcher, config.batch_size, 'test_evaluation')
+            res = ranking_and_hits(model, test_rank_batcher, config.batch_size, 'test_evaluation')
+            
+            mr = res['mr']
             log.info("Evaluation: finished")
             log.info("Evaluation took {}".format(datetime.datetime.now() - eval_start_time))
 
-            early_stop_flag = early_stopping(mr, mr_opt, config.early_stop_threshold)
+            early_stop_flag = True #early_stopping(mr, mr_opt, config.early_stop_threshold)
 
             if mr < mr_opt:
                 model_opt = model
                 mr_opt = mr
+                
+            logger.log({ f"eval/{k}": v for k, v in res.items() })
 
         log.info("{} epoch: finished".format(i))
         log.info("Epoch {} took {}".format(i, datetime.datetime.now() - epoch_start_time))

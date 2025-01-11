@@ -23,12 +23,12 @@ class Config(object):
     eval_rate = 8  # run evaluation after each N epochs
     n_clusters = 1000
     sample_size = 1000  # number of training examples per one AL iteration
-    sampling_mode = 'structured-uncertainty'
+    sampling_mode = 'omni_random'
     training_mode = 'meta-incremental'
     window_size = 10000
 
     # model params
-    batch_size = 128
+    batch_size = 512
     dropout = 0.3
     embedding_dim = 200
     feature_map_dropout = 0.2
@@ -37,7 +37,7 @@ class Config(object):
     label_smoothing_epsilon = 0.1
     learning_rate = 0.003
     learning_rate_decay = 0.995
-    model_name = None
+    model_name = "ConvE"
     optimizer = 'adam'
 
     def __init__(self, args):

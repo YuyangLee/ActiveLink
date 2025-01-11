@@ -4,7 +4,7 @@
 `data/<dataset_name>`
 
 Each dataset contains 3 files: `train.txt`, `test.txt` and `valid.txt`
-Each file contains a list of triples, one triple per line.
+Each file contains a list of triplets, one triple per line.
 Triple format: `<entity_1>\t<relation>\t<entity_2>`
 
 Before the first usage the dataset should be preprocessed:
@@ -12,7 +12,7 @@ Before the first usage the dataset should be preprocessed:
 `python preprocess.py <dataset_name>`
 
 This step generates 6 files:
-* Training, validation and testing sets grouped into "multitriples" (one head entity is combined with all its tail entities in one triple) with added reverse triples. 
+* Training, validation and testing sets grouped into "multitriplets" (one head entity is combined with all its tail entities in one triple) with added reverse triplets. 
 
   Example:
     ```angular2html
