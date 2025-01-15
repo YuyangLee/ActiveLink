@@ -4,11 +4,11 @@ import argparse
 from tqdm import tqdm
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--entity', type=int, default=200)
-parser.add_argument('--relation', type=int, default=15)
-parser.add_argument('--lambda1', type=float, default=3)
+parser.add_argument('--entity', type=int, default=300)
+parser.add_argument('--relation', type=int, default=30)
+parser.add_argument('--lambda1', type=float, default=1)
 parser.add_argument('--lambda2', type=float, default=1)
-parser.add_argument('--known', type=int, default=300)
+parser.add_argument('--known', type=int, default=200)
 parser.add_argument('--seed', type=int, default=2024)
 parser.add_argument('--output_rule', type=str, default='rules.txt')
 parser.add_argument('--output_relation', type=str, default='relations.txt')
