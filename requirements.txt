@@ -1,0 +1,8 @@
+matplotlib==3.10.0
+numba==0.59.1
+numpy==2.2.2
+pyspark==3.5.4
+scikit_learn==1.6.1
+torch==2.4.0
+torch==2.5.1
+tqdm==4.67.1
