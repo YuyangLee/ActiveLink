@@ -22,24 +22,17 @@ python 1_preproc_ds_data.py
 
 ### Generate Synthetic Dataset
 
-<!-- TODO for Yuntian: Add your README here. -->
-
-After generation, also pre-process the data into the format suitable for our training:
+To generate a complete synthetic dataset, run the following:
 
 ```shell
-python 1_preproc_syn_data.py
-```
-
-To generate a complete synthetic dataset, run the following:
-```
 python synthetic_data/generate.py\
- --entity ${ENTITY}\
- --relation ${RELATION}\
- --lambda1 ${LAMBDA1}\
- --lambda2 ${LAMBDA2}\
- --known ${KNOWN}\
- --seed 2024\
- --output_rule rules.txt\
+ --entity ${ENTITY} \
+ --relation ${RELATION} \
+ --lambda1 ${LAMBDA1} \
+ --lambda2 ${LAMBDA2} \
+ --known ${KNOWN} \
+ --seed 2024 \
+ --output_rule rules.txt \
  --output_relation relations.txt
 ```
 
@@ -48,14 +41,21 @@ python synthetic_data/generate.py\
 - The parameter `lambda2` governs the expectation of the length of Definite Horn Clause.
 - The parameter `known` defines the quantity of initial facts.
 
+After generation, also pre-process the data into the format suitable for our training:
+
+```shell
+python 1_preproc_syn_data.py
+```
+
 ## Benchmark KG Annotation (Triplet Selection)
 
 Following ActiveLink, we use **Meta Incremental Learning** to train the KG embeddings incrementally.
 
 ```shell
-python main.py --dataset DATASET
-               --model MODEL
-               --sampling-mode SAMPLING_MODE
+python main.py --dataset DATASET \
+               --model MODEL \
+               --sampling-mode SAMPLING_MODE \
+               --seed SEED
 ```
 
 Available `DATASET`:
