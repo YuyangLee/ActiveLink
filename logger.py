@@ -23,5 +23,5 @@ def setup_logger():
     stream_handler.setLevel(logging.INFO)
     stream_handler.setFormatter(log_formatter)
     logger.addHandler(stream_handler)
-    
+
     return log_dir, time_tag

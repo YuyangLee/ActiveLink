@@ -13,8 +13,42 @@ else:
 
 print("Processing dataset {0}".format(dataset_name))
 
-rdm = np.random.RandomState(2342423)
+rdm = np.random.RandomState(42)
 base_path = "data/{0}/".format(dataset_name)
+
+# relations.txt -> train.txt, valid.txt, test.txt
+
+data = open(join(base_path, "relations.txt")).readlines()
+
+n_relations = int(data[0])
+all_relations = [list(map(int, r.split(" "))) for r in data[1:]]
+
+# Random split
+rdm.shuffle(all_relations)
+
+train_relations = all_relations[: int(0.7 * n_relations)]
+valid_relations = all_relations[int(0.7 * n_relations) : int(0.85 * n_relations)]
+test_relations = all_relations[int(0.85 * n_relations) :]
+
+with open(join(base_path, "train.txt"), "w") as f:
+    f.truncate()
+    for r in train_relations:
+        r_str = [f"/syn/ent{r[0]}", f"/syn/rel{r[1]}", f"/syn/ent{r[2]}"]
+        f.write("\t".join(map(str, r_str)) + "\n")
+
+with open(join(base_path, "valid.txt"), "w") as f:
+    f.truncate()
+    for r in train_relations:
+        r_str = [f"/syn/ent{r[0]}", f"/syn/rel{r[1]}", f"/syn/ent{r[2]}"]
+        f.write("\t".join(map(str, r_str)) + "\n")
+
+with open(join(base_path, "test.txt"), "w") as f:
+    f.truncate()
+    for r in train_relations:
+        r_str = [f"/syn/ent{r[0]}", f"/syn/rel{r[1]}", f"/syn/ent{r[2]}"]
+        f.write("\t".join(map(str, r_str)) + "\n")
+
+
 files = ["train.txt", "valid.txt", "test.txt"]
 
 data = []

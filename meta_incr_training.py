@@ -1,7 +1,7 @@
-from collections import OrderedDict
 import copy
 import datetime
 import logging
+from collections import OrderedDict
 
 import torch
 from torch.autograd import Variable
@@ -34,8 +34,10 @@ def perform_task_meta_update(config, str2var_val, model, updated_params):
         shape = model_grad.shape
         task_grad.volatile = False
 
-        if name == 'emb_rel.weight':
-            model_second_grad = Variable(torch.cuda.FloatTensor(*shape).fill_(0)), # emb_rel gradient is constant => 2nd gradient is 0
+        if name == "emb_rel.weight":
+            model_second_grad = (
+                Variable(torch.cuda.FloatTensor(*shape).fill_(0)),
+            )  # emb_rel gradient is constant => 2nd gradient is 0
         else:
             if len(shape) > 1:
                 new_shape = 1
@@ -79,7 +81,8 @@ def perform_meta_update(config, val_batcher, model, grads, opt):
     # Register a hook on each parameter in the net that replaces the current dummy grad
     # with our grads accumulated across the meta-batch
     hooks = []
-    for (k, v) in model.named_parameters():
+    for k, v in model.named_parameters():
+
         def get_closure():
             key = k
 
@@ -140,7 +143,7 @@ def run_inner(config, model, task):
 def run_meta_incremental(config, model, train_batcher, test_rank_batcher, logger=None):
     opt = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
 
-    mr_opt = float('inf')
+    mr_opt = float("inf")
     model_opt = model
     early_stop_flag = False
     i = 1
@@ -157,14 +160,13 @@ def run_meta_incremental(config, model, train_batcher, test_rank_batcher, logger
         for task in train_batcher.tasks:
             g = run_inner(config, model, task)
             grads.append(g)
-        loop_time = datetime.datetime.now() - inner_loop_start,
+        loop_time = (datetime.datetime.now() - inner_loop_start,)
         log.info("Inner loop: finished")
         log.info("Inner loop took {}".format(loop_time))
-        
-        logger.log({
-            "train/n_triplets": train_batcher.curr_n_triplets,
-            "train/completeness": train_batcher.curr_completeness
-        })
+
+        logger.log(
+            {"train/n_triplets": train_batcher.curr_n_triplets, "train/completeness": train_batcher.curr_completeness}
+        )
 
         # Perform the meta update
         perform_meta_update(config, test_rank_batcher, model, grads, opt)
@@ -173,19 +175,19 @@ def run_meta_incremental(config, model, train_batcher, test_rank_batcher, logger
             model.eval()
             log.info("Evaluation: started")
             eval_start_time = datetime.datetime.now()
-            res = ranking_and_hits(model, test_rank_batcher, config.batch_size, 'test_evaluation')
-            
-            mr = res['mr']
+            res = ranking_and_hits(model, test_rank_batcher, config.batch_size, "test_evaluation")
+
+            mr = res["mr"]
             log.info("Evaluation: finished")
             log.info("Evaluation took {}".format(datetime.datetime.now() - eval_start_time))
 
-            early_stop_flag = True #early_stopping(mr, mr_opt, config.early_stop_threshold)
+            early_stop_flag = True  # early_stopping(mr, mr_opt, config.early_stop_threshold)
 
             if mr < mr_opt:
                 model_opt = model
                 mr_opt = mr
-                
-            logger.log({ f"eval/{k}": v for k, v in res.items() })
+
+            logger.log({f"eval/{k}": v for k, v in res.items()})
 
         log.info("{} epoch: finished".format(i))
         log.info("Epoch {} took {}".format(i, datetime.datetime.now() - epoch_start_time))

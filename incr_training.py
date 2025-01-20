@@ -15,7 +15,7 @@ def early_stopping(mr, mr_opt, threshold):
 def run_incremental(model, config, train_batcher, test_rank_batcher):
     opt = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
 
-    mr_opt = float('inf')
+    mr_opt = float("inf")
     model_opt = model
     early_stop_flag = False
     i = 1
@@ -40,7 +40,7 @@ def run_incremental(model, config, train_batcher, test_rank_batcher):
 
         if i % config.eval_rate == 0:
             model.eval()
-            mr = ranking_and_hits(model, test_rank_batcher, config.batch_size, 'dev_evaluation')
+            mr = ranking_and_hits(model, test_rank_batcher, config.batch_size, "dev_evaluation")
 
             early_stop_flag = early_stopping(mr, mr_opt, config.early_stop_threshold)
 

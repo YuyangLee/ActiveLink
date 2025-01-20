@@ -1,5 +1,6 @@
 import torch
-from torch.nn import functional as F, Parameter
+from torch.nn import Parameter
+from torch.nn import functional as F
 from torch.nn.init import xavier_normal
 
 
@@ -19,7 +20,7 @@ class ConvE(torch.nn.Module):
         self.bn0 = torch.nn.BatchNorm2d(1)
         self.bn1 = torch.nn.BatchNorm2d(32)
         self.bn2 = torch.nn.BatchNorm1d(self.embedding_dim)
-        self.register_parameter('b', Parameter(torch.zeros(num_entities)))
+        self.register_parameter("b", Parameter(torch.zeros(num_entities)))
         self.fc2 = torch.nn.Linear(10368, self.embedding_dim)
 
     def init(self):
@@ -62,29 +63,33 @@ class ConvE(torch.nn.Module):
             x = torch.mm(x, self.emb_e.weight.transpose(1, 0))  # out: (128L, 14541L)
             pred = x + self.b.expand_as(x)
         else:
-            e1_embedded = self._embedding(e1, weights['emb_e.weight']).view(-1, 1, 10, 20)
-            rel_embedded = self._embedding(rel, weights['emb_rel.weight']).view(-1, 1, 10, 20)
+            e1_embedded = self._embedding(e1, weights["emb_e.weight"]).view(-1, 1, 10, 20)
+            rel_embedded = self._embedding(rel, weights["emb_rel.weight"]).view(-1, 1, 10, 20)
             stacked_inputs = torch.cat([e1_embedded, rel_embedded], 2)
-            x = self._batch_norm(1, stacked_inputs, weights['bn0.weight'], weights['bn0.bias'])
+            x = self._batch_norm(1, stacked_inputs, weights["bn0.weight"], weights["bn0.bias"])
             x = self.inp_drop(x)
-            x = self._conv2d(x, weights['conv1.weight'], weights['conv1.bias'])
-            x = self._batch_norm(32, x, weights['bn1.weight'], weights['bn1.bias'])
+            x = self._conv2d(x, weights["conv1.weight"], weights["conv1.bias"])
+            x = self._batch_norm(32, x, weights["bn1.weight"], weights["bn1.bias"])
             x = F.relu(x)
             x = self.feature_map_drop(x)
             x = x.view(batch_size, -1)
-            x = self._linear(x, weights['fc2.weight'], weights['fc2.bias'])
+            x = self._linear(x, weights["fc2.weight"], weights["fc2.bias"])
             x = self.hidden_drop(x)
-            x = self._batch_norm(self.embedding_dim, x, weights['bn2.weight'], weights['bn2.bias'])
+            x = self._batch_norm(self.embedding_dim, x, weights["bn2.weight"], weights["bn2.bias"])
             x = F.relu(x)
-            x = torch.mm(x, weights['emb_e.weight'].transpose(1, 0))
-            pred = x + weights['b'].expand_as(x)
+            x = torch.mm(x, weights["emb_e.weight"].transpose(1, 0))
+            pred = x + weights["b"].expand_as(x)
 
         return pred
 
     def copy_weights(self, net):
-        ''' Set this module's weights to be the same as those of 'net' '''
+        """Set this module's weights to be the same as those of 'net'"""
         for m_from, m_to in zip(net.modules(), self.modules()):
-            if isinstance(m_to, torch.nn.Linear) or isinstance(m_to, torch.nn.Conv2d) or isinstance(m_to, torch.nn.BatchNorm2d):
+            if (
+                isinstance(m_to, torch.nn.Linear)
+                or isinstance(m_to, torch.nn.Conv2d)
+                or isinstance(m_to, torch.nn.BatchNorm2d)
+            ):
                 m_to.weight.data = m_from.weight.data.clone()
                 if m_to.bias is not None:
                     m_to.bias.data = m_from.bias.data.clone()
@@ -107,7 +112,7 @@ class MultilayerPerceptropn(torch.nn.Module):
         self.bn0 = torch.nn.BatchNorm2d(1)
         self.bn1 = torch.nn.BatchNorm1d(self.embedding_dim)
         self.bn2 = torch.nn.BatchNorm1d(self.embedding_dim)
-        self.register_parameter('b', Parameter(torch.zeros(num_entities)))
+        self.register_parameter("b", Parameter(torch.zeros(num_entities)))
         self.fc1 = torch.nn.Linear(400, self.embedding_dim)
         self.fc2 = torch.nn.Linear(200, self.embedding_dim)
 
@@ -148,21 +153,21 @@ class MultilayerPerceptropn(torch.nn.Module):
             x = torch.mm(x, self.emb_e.weight.transpose(1, 0))
             pred = x + self.b.expand_as(x)
         else:
-            e1_embedded = self._embedding(e1, weights['emb_e.weight']).view(-1, 1, 10, 20)
-            rel_embedded = self._embedding(rel, weights['emb_rel.weight']).view(-1, 1, 10, 20)
+            e1_embedded = self._embedding(e1, weights["emb_e.weight"]).view(-1, 1, 10, 20)
+            rel_embedded = self._embedding(rel, weights["emb_rel.weight"]).view(-1, 1, 10, 20)
             stacked_inputs = torch.cat([e1_embedded, rel_embedded], 2)
-            x = self._batch_norm(1, stacked_inputs, weights['bn0.weight'], weights['bn0.bias'])
+            x = self._batch_norm(1, stacked_inputs, weights["bn0.weight"], weights["bn0.bias"])
             x = self.inp_drop(x)
             x = x.view(batch_size, -1)
-            x = self._linear(x, weights['fc1.weight'], weights['fc1.bias'])
-            x = self._batch_norm(self.embedding_dim, x, weights['bn1.weight'], weights['bn1.bias'])
+            x = self._linear(x, weights["fc1.weight"], weights["fc1.bias"])
+            x = self._batch_norm(self.embedding_dim, x, weights["bn1.weight"], weights["bn1.bias"])
             x = F.relu(x)
             x = self.feature_map_drop(x)
-            x = self._linear(x, weights['fc2.weight'], weights['fc2.bias'])
+            x = self._linear(x, weights["fc2.weight"], weights["fc2.bias"])
             x = self.hidden_drop(x)
-            x = self._batch_norm(self.embedding_dim, x, weights['bn2.weight'], weights['bn2.bias'])
+            x = self._batch_norm(self.embedding_dim, x, weights["bn2.weight"], weights["bn2.bias"])
             x = F.relu(x)
-            x = torch.mm(x, weights['emb_e.weight'].transpose(1, 0))
-            pred = x + weights['b'].expand_as(x)
+            x = torch.mm(x, weights["emb_e.weight"].transpose(1, 0))
+            pred = x + weights["b"].expand_as(x)
 
         return pred
