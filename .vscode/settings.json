@@ -1,0 +1,17 @@
+{
+    "[python]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": { "source.organizeImports": "explicit" },
+    },
+    "isort.args": [ "--profile", "black", "--filter-files" ],
+    "black-formatter.args": [ "--unstable", "--line-length", "120" ],
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "editor.rulers": [120],
+
+    "files.exclude": { "**/__pycache__": true },
+    "files.watcherExclude": { "**/__pycache__": true }
+}

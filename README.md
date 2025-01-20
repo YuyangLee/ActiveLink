@@ -8,7 +8,27 @@
 pip install -r requirements.txt
 ```
 
-## Generate Synthetic Dataset
+## Prepare Data
+
+### Prepare Dataset Data
+
+First, go to `data/` and unzip the archives to get the datasets (freebase and wikidata). We will only use `Freebase` here.
+
+After unzipping, we need to pre-process it:
+
+```shell
+python 1_preproc_ds_data.py
+```
+
+### Generate Synthetic Dataset
+
+<!-- TODO for Yuntian: Add your README here. -->
+
+After generation, also pre-process the data into the format suitable for our training:
+
+```shell
+python 1_preproc_syn_data.py
+```
 
 ## Benchmark KG Annotation (Triplet Selection)
 
@@ -20,7 +40,7 @@ python main.py --dataset DATASET
                --sampling-mode SAMPLING_MODE
 ```
 
-Available `DATASET`: 
+Available `DATASET`:
 - `FB15k-237`: The Freebase15k-237 dataset. Go to `data/` and unzip the three zip archives to get them
 - `Synthetic`: Synthetic dataset generated using our algorithm
 

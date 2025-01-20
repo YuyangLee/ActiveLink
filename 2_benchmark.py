@@ -3,17 +3,18 @@
 import argparse
 import logging
 
+import wandb
+
 from config import Config
-from data_streamers import DataStreamer, DataSampleStreamer, DataTaskStreamer
+from data_streamers import DataSampleStreamer, DataStreamer, DataTaskStreamer
 from incr_training import run_incremental
 from logger import setup_logger
 from meta_incr_training import run_meta_incremental
 from models import ConvE, MultilayerPerceptropn
 
-import wandb
-
 log_dir, time_tag = setup_logger()
 log = logging.getLogger()
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -29,13 +30,18 @@ def parse_args():
     parser.add_argument("--lr-decay", dest="learning_rate_decay", type=float)
     parser.add_argument("--model", dest="model_name", choices=["ConvE", "MLP"])
     parser.add_argument("--n-clusters", dest="n_clusters", type=int)
-    parser.add_argument("--sample-size", dest="sample_size", type=int, help="number of training examples per one AL iteration")
-    parser.add_argument("--sampling-mode", dest="sampling_mode", choices=["omni_random", "omni_t_uncer", "random", "r_uncer"])
+    parser.add_argument(
+        "--sample-size", dest="sample_size", type=int, help="number of training examples per one AL iteration"
+    )
+    parser.add_argument(
+        "--sampling-mode", dest="sampling_mode", choices=["omni_random", "omni_t_uncer", "random", "r_uncer"]
+    )
     parser.add_argument("--training-mode", dest="training_mode", choices=["retrain", "incremental", "meta-incremental"])
     parser.add_argument("--window-size", dest="window_size", type=int)
-    
+
     args = parser.parse_args()
     return args
+
 
 def init_model(config, num_entities, num_relations):
     if config.model_name == "ConvE":
@@ -76,11 +82,11 @@ def build_vocabs(config):
             relation2id[relation] = int(rel_idx)  # id == 0 is a bad idea
             relation2id[relation + "_reverse"] = rel_reverse_idx
             rel_reverse_idx += 1
-            
+
     # Initial ID: 1 -> 0
     entity2id = {k: v - 1 for k, v in entity2id.items()}
     relation2id = {k: v - 1 for k, v in relation2id.items()}
-            
+
     return entity2id, relation2id
 
 
@@ -90,7 +96,7 @@ def main():
     config = Config(args)
     run_nametag = f"ds={config.dataset}_mode={config.sampling_mode}_model={config.model_name}-{time_tag}"
     logger = wandb.init(project="active-learning-kgc", dir=log_dir, name=run_nametag, config=vars(config))
-    
+
     # Percentage
     wandb.define_metric("train/completeness")
     wandb.define_metric("eval/*", step_metric="train/completeness")
