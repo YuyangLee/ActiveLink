@@ -10,6 +10,24 @@ pip install -r requirements.txt
 
 ## Generate Synthetic Dataset
 
+To generate a complete synthetic dataset, run the following:
+```
+python synthetic_data/generate.py\
+ --entity ${ENTITY}\
+ --relation ${RELATION}\
+ --lambda1 ${LAMBDA1}\
+ --lambda2 ${LAMBDA2}\
+ --known ${KNOWN}\
+ --seed 2024\
+ --output_rule rules.txt\
+ --output_relation relations.txt
+```
+
+- `entity` and `relation` specify the number of different entities and relations in the knowledge graph. \
+- The parameter `lambda1` governs the expectation regarding the number of distinct rules employed to prove a single triplet.
+- The parameter `lambda2` governs the expectation of the length of Definite Horn Clause.
+- The parameter `known` defines the quantity of initial facts.
+
 ## Benchmark KG Annotation (Triplet Selection)
 
 Following ActiveLink, we use **Meta Incremental Learning** to train the KG embeddings incrementally.
