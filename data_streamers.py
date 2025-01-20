@@ -661,8 +661,8 @@ class DataTaskStreamer(DataSampleStreamer):
             current_sample = self.update_omni_t_uncert(model)
         elif self.sampling_mode == "random":
             current_sample = self.update_random()
-        elif self.sampling_mode == "relation_uncert":
-            current_sample = self.update_r_uncer()
+        elif self.sampling_mode == "r_uncer":
+            current_sample = self.update_r_uncer(model)
         elif self.sampling_mode == "structured":
             current_sample = self.update_clustering()
         elif self.sampling_mode == "structured-uncertainty":
