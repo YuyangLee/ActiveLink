@@ -339,33 +339,6 @@ class DataSampleStreamer(DataStreamer):
             current_sample.append(self.remaining_data.pop(idx))
 
         return current_sample
-    
-    def update_r_uncer(self, model):
-        current_sample = []
-
-        model.train()  # activate dropouts
-
-        if len(self.remaining_data) % self.batch_size == 1:
-            batch_size = self.batch_size - 1  # we need this trick because batch_norm doesn't accept tensor of size 1
-        else:
-            batch_size = self.batch_size
-
-        uncertainty = torch.cuda.FloatTensor(len(self.remaining_data))
-
-        remaining_data_streamer = DataStreamer(self.entity2id, self.rel2id, batch_size, use_all_data=True)
-        remaining_data_streamer.init_from_list(self.remaining_data)
-        
-        for i_relation in range(self.num_entities):
-            np.where(~self.triplets[:, i_relation])
-            
-        uncertainty_sorted, uncertainty_indices_sorted = torch.sort(uncertainty, 0, descending=True)
-
-        top_n = uncertainty_indices_sorted[:self.sample_size]
-
-        for idx in sorted(top_n, reverse=True):  # delete elements from right to left to avoid issues with reindexing
-            current_sample.append(self.remaining_data.pop(idx))
-
-        return current_sample
 
     def update_clustering(self):
         empty_clusters = []
@@ -618,6 +591,33 @@ class DataTaskStreamer(DataSampleStreamer):
                 })
                 break
             
+        return current_sample
+    
+    def update_r_uncer(self, model):
+        current_sample = []
+
+        model.train()  # activate dropouts
+
+        if len(self.remaining_data) % self.batch_size == 1:
+            batch_size = self.batch_size - 1  # we need this trick because batch_norm doesn't accept tensor of size 1
+        else:
+            batch_size = self.batch_size
+
+        uncertainty = torch.cuda.FloatTensor(len(self.remaining_data))
+
+        remaining_data_streamer = DataStreamer(self.entity2id, self.rel2id, batch_size, use_all_data=True)
+        remaining_data_streamer.init_from_list(self.remaining_data)
+        
+        for i_relation in range(self.num_entities):
+            np.where(~self.triplets[:, i_relation])
+            
+        uncertainty_sorted, uncertainty_indices_sorted = torch.sort(uncertainty, 0, descending=True)
+
+        top_n = uncertainty_indices_sorted[:self.sample_size]
+
+        for idx in sorted(top_n, reverse=True):  # delete elements from right to left to avoid issues with reindexing
+            current_sample.append(self.remaining_data.pop(idx))
+
         return current_sample
 
     def init(self, path):
